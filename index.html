@@ -6,2102 +6,2530 @@
 <title>Dragon Snake Battle</title>
 
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  user-select:none;
+  -webkit-user-select:none;
+}
 
-html,body{
-margin:0;padding:0;width:100%;height:100%;
-overflow:hidden;background:#06111d;color:white;
-font-family:Arial,sans-serif
+body{
+  background:#050505;
+  color:white;
+  font-family:Arial,sans-serif;
+  overflow:hidden;
+}
+
+#menu{
+  position:fixed;
+  inset:0;
+  background:linear-gradient(135deg,#080808,#171717);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:20;
+  padding:20px;
+}
+
+#menu h1{
+  font-size:38px;
+  color:#ffd400;
+  text-shadow:0 0 20px #ff8c00;
+  margin-bottom:10px;
+}
+
+#menu p{
+  color:#aaa;
+  margin-bottom:25px;
+}
+
+input{
+  width:280px;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  text-align:center;
+  font-size:18px;
+  margin-bottom:15px;
+  outline:none;
+}
+
+button{
+  border:none;
+  border-radius:12px;
+  padding:12px 20px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.startBtn{
+  background:#ffd400;
+  color:#111;
+  box-shadow:0 0 20px #ff9d00;
+}
+
+#game{
+  display:none;
+  position:fixed;
+  inset:0;
 }
 
 canvas{
-position:fixed;inset:0;width:100%;height:100%;
-display:block;touch-action:none
+  display:block;
+  width:100%;
+  height:100%;
+  background:#101010;
 }
 
-button,input{font-family:inherit}
-
-#menu,#shop,#gameOver{
-position:fixed;inset:0;z-index:20;
-display:flex;align-items:center;justify-content:center;
-padding:18px;
-background:radial-gradient(circle,#173b58,#06111d 70%);
+#topUI{
+  position:fixed;
+  top:10px;
+  left:10px;
+  right:10px;
+  z-index:5;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  pointer-events:none;
 }
 
-.box{
-width:min(430px,100%);
-background:rgba(5,15,25,.95);
-border:2px solid rgba(255,255,255,.12);
-border-radius:25px;
-padding:25px;
-text-align:center;
-box-shadow:0 20px 60px #000;
+.panel{
+  background:rgba(0,0,0,.65);
+  backdrop-filter:blur(6px);
+  border:1px solid rgba(255,255,255,.12);
+  padding:9px 12px;
+  border-radius:12px;
+  font-size:14px;
 }
 
-.logo{
-font-size:38px;font-weight:900;margin-bottom:5px
-}
-
-.logo span{color:#ffd43b}
-
-.sub{color:#9fb1c1;margin-bottom:20px}
-
-input{
-width:100%;padding:14px;border:0;border-radius:12px;
-font-size:17px;margin-bottom:12px
-}
-
-.mainBtn,.shopBtn{
-width:100%;padding:15px;border:0;border-radius:13px;
-font-size:18px;font-weight:bold;cursor:pointer
-}
-
-.mainBtn{background:#00e676;color:#002b17}
-.shopBtn{background:#ffd43b;color:#302400;margin-top:10px}
-
-.info{
-font-size:13px;line-height:1.65;color:#93a7b7;margin-top:15px
-}
-
-#gameUI{
-position:fixed;inset:0;z-index:5;pointer-events:none
-}
-
-.top{
-position:absolute;top:10px;left:10px;right:10px;
-display:flex;justify-content:space-between;gap:10px
-}
-
-.stat,.rank,.coinUI{
-background:rgba(3,12,21,.82);
-border:1px solid rgba(255,255,255,.14);
-border-radius:14px;padding:9px 12px;
-backdrop-filter:blur(7px)
-}
-
-.stat{font-size:13px;line-height:1.5}
-.stat b{color:#ffd43b}
-
-.rank{width:165px;font-size:11px}
-.rankTitle{color:#ffd43b;font-weight:bold;margin-bottom:5px}
-.rankRow{display:flex;justify-content:space-between;margin:3px 0}
-
-.coinUI{
-position:absolute;
-top:125px;
-left:10px;
-color:#ffd43b;
-font-weight:bold
+#shopBtn{
+  pointer-events:auto;
+  background:#ffb400;
+  color:#111;
+  padding:9px 14px;
 }
 
 #powerUI{
-position:absolute;
-top:160px;
-left:10px;
-font-size:12px;
-line-height:1.5
+  position:fixed;
+  top:72px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:5;
+  display:flex;
+  gap:5px;
+  font-size:12px;
 }
 
 .power{
-background:rgba(0,0,0,.65);
-border-radius:9px;
-padding:5px 8px;
-margin-top:3px
+  background:rgba(0,0,0,.65);
+  padding:6px 9px;
+  border-radius:8px;
+  display:none;
 }
-
-#message{
-position:absolute;
-top:42%;left:50%;
-transform:translate(-50%,-50%);
-font-size:27px;font-weight:900;
-text-shadow:0 4px 15px #000;
-opacity:0;transition:.2s;
-white-space:nowrap
-}
-
-#message.show{opacity:1}
 
 #joystick{
-position:absolute;
-bottom:25px;left:22px;
-width:125px;height:125px;border-radius:50%;
-background:rgba(255,255,255,.1);
-border:2px solid rgba(255,255,255,.2);
-pointer-events:auto;touch-action:none
+  position:fixed;
+  left:25px;
+  bottom:30px;
+  width:125px;
+  height:125px;
+  border-radius:50%;
+  background:rgba(255,255,255,.10);
+  border:2px solid rgba(255,255,255,.2);
+  z-index:8;
+  touch-action:none;
 }
 
 #stick{
-position:absolute;left:50%;top:50%;
-width:54px;height:54px;
-margin:-27px;border-radius:50%;
-background:rgba(255,255,255,.35)
+  position:absolute;
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  background:rgba(255,200,0,.75);
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
 }
 
 #boostBtn{
-position:absolute;right:20px;bottom:25px;
-width:82px;height:82px;border-radius:50%;
-border:3px solid white;
-background:linear-gradient(#ffca28,#ff6d00);
-color:white;font-weight:bold;
-pointer-events:auto;touch-action:none
+  position:fixed;
+  right:30px;
+  bottom:45px;
+  width:85px;
+  height:85px;
+  border-radius:50%;
+  background:#ff8c00;
+  color:white;
+  font-size:15px;
+  z-index:8;
+  box-shadow:0 0 25px rgba(255,120,0,.6);
+  touch-action:none;
 }
 
-#shop{
-display:none;z-index:50
-}
-
-.shopTitle{
-font-size:30px;font-weight:900;color:#ffd43b
-}
-
-.balance{
-margin:10px 0 18px;
-font-size:18px
-}
-
-.item{
-display:flex;align-items:center;
-justify-content:space-between;
-background:#102538;
-border-radius:14px;
-padding:11px;margin:8px 0;
-text-align:left
-}
-
-.itemInfo{
-display:flex;gap:10px;align-items:center
-}
-
-.itemIcon{font-size:30px}
-.itemName{font-weight:bold}
-.itemDesc{font-size:11px;color:#9fb1c1;margin-top:3px}
-
-.buy{
-border:0;border-radius:10px;
-padding:9px 12px;
-background:#00e676;
-font-weight:bold
-}
-
-.close{
-width:100%;padding:12px;
-border:0;border-radius:12px;
-background:#374b5c;color:white;
-margin-top:12px;font-weight:bold
-}
-
+#shop,
 #gameOver{
-display:none;z-index:60
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.82);
+  z-index:30;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
 }
 
-.overTitle{
-font-size:38px;font-weight:900
+.modal{
+  width:min(420px,95vw);
+  background:#151515;
+  border:1px solid #333;
+  border-radius:20px;
+  padding:22px;
+  text-align:center;
+  box-shadow:0 0 40px rgba(0,0,0,.8);
 }
 
-.finalScore{
-font-size:24px;color:#ffd43b;margin:15px
+.modal h2{
+  color:#ffd400;
+  margin-bottom:15px;
 }
 
-#shopButton{
-position:absolute;
-top:125px;right:10px;
-border:0;border-radius:12px;
-background:#ffd43b;
-padding:9px 12px;
-font-weight:bold;
-pointer-events:auto
+.shopItem{
+  background:#222;
+  margin:9px 0;
+  padding:13px;
+  border-radius:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
-@media(min-width:700px){
-#joystick{display:none}
-#boostBtn{right:30px;bottom:30px}
+.shopItem button{
+  background:#ffd000;
+  color:#111;
+  padding:8px 12px;
+}
+
+.closeBtn{
+  margin-top:15px;
+  background:#444;
+  color:white;
+}
+
+#leaderboard{
+  margin-top:10px;
+  text-align:left;
+  font-size:12px;
+  color:#ccc;
+}
+
+@media(max-width:600px){
+  #menu h1{
+    font-size:30px;
+  }
+
+  .panel{
+    font-size:12px;
+    padding:7px 9px;
+  }
+
+  #joystick{
+    width:110px;
+    height:110px;
+  }
+
+  #boostBtn{
+    width:75px;
+    height:75px;
+    right:20px;
+    bottom:35px;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<canvas id="gameCanvas"></canvas>
-
-<!-- MENU -->
 <div id="menu">
-<div class="box">
+  <h1>🐉 DRAGON SNAKE</h1>
+  <p>Battle • Survive • Become the Biggest</p>
 
-<div class="logo">🐉 DRAGON <span>SNAKE</span></div>
-<div class="sub">⚔️ Battle Arena</div>
+  <input id="nameInput" maxlength="15" placeholder="Nama pemain">
 
-<input id="playerName" maxlength="15"
-value="Dimas" placeholder="Nama pemain">
-
-<button class="mainBtn" onclick="startGame()">
-🚀 MULAI BATTLE
-</button>
-
-<div class="info">
-🍰 Kue akan tertarik ke kepala ular<br>
-🧲 Magnet = jangkauan hisap besar<br>
-🔍 Kaca pembesar = arena terlihat lebih luas<br>
-✖️5 Bonus = nilai makanan/koin 5×<br>
-⚡2× Speed = ular bergerak 2× lebih cepat<br>
-🪙 Koin dapat digunakan membeli item<br>
-💀 Kepala menabrak badan = mati
+  <button class="startBtn" onclick="startGame()">
+    MULAI GAME
+  </button>
 </div>
 
-</div>
-</div>
+<div id="game">
 
-<!-- SHOP -->
-<div id="shop">
-<div class="box">
+<canvas id="canvas"></canvas>
 
-<div class="shopTitle">🛒 TOKO ITEM</div>
+<div id="topUI">
 
-<div class="balance">
-🪙 Koin: <b id="shopCoins">0</b>
-</div>
+  <div class="panel">
+    🐉 <b id="playerName">Player</b><br>
+    Score: <b id="scoreText">0</b><br>
+    Level: <b id="levelText">1</b><br>
+    🪙 <b id="coinText">0</b>
+  </div>
 
-<div class="item">
-<div class="itemInfo">
-<div class="itemIcon">🧲</div>
-<div>
-<div class="itemName">MAGNET</div>
-<div class="itemDesc">Hisap makanan & koin lebih jauh</div>
-</div>
-</div>
-<button class="buy" onclick="buyItem('magnet',50)">50 🪙</button>
-</div>
-
-<div class="item">
-<div class="itemInfo">
-<div class="itemIcon">🔍</div>
-<div>
-<div class="itemName">KACA PEMBESAR</div>
-<div class="itemDesc">Layar arena menjadi lebih luas</div>
-</div>
-</div>
-<button class="buy" onclick="buyItem('zoom',80)">80 🪙</button>
-</div>
-
-<div class="item">
-<div class="itemInfo">
-<div class="itemIcon">✖️5</div>
-<div>
-<div class="itemName">BONUS 5×</div>
-<div class="itemDesc">Nilai makanan & koin 5×</div>
-</div>
-</div>
-<button class="buy" onclick="buyItem('bonus',100)">100 🪙</button>
-</div>
-
-<div class="item">
-<div class="itemInfo">
-<div class="itemIcon">⚡</div>
-<div>
-<div class="itemName">SPEED 2×</div>
-<div class="itemDesc">Kecepatan ular 2×</div>
-</div>
-</div>
-<button class="buy" onclick="buyItem('speed',100)">100 🪙</button>
-</div>
-
-<button class="close" onclick="closeShop()">
-TUTUP TOKO
-</button>
-
-</div>
-</div>
-
-<!-- GAME UI -->
-<div id="gameUI">
-
-<div class="top">
-
-<div class="stat">
-🐉 <span id="nameUI">Dimas</span><br>
-⭐ <b id="scoreUI">100</b> Poin<br>
-📏 <b id="lengthUI">12</b> Panjang<br>
-🏆 Level <b id="levelUI">1</b>
-</div>
-
-<div class="rank">
-<div class="rankTitle">🏆 LEADERBOARD</div>
-<div id="leaderboard"></div>
-</div>
+  <button id="shopBtn" onclick="openShop()">🛒 SHOP</button>
 
 </div>
 
-<div class="coinUI">
-🪙 <span id="coinUI">0</span>
+<div id="powerUI">
+  <div class="power" id="magnetUI">🧲 <span></span></div>
+  <div class="power" id="zoomUI">🔭 <span></span></div>
+  <div class="power" id="bonusUI">💰 5× <span></span></div>
+  <div class="power" id="speedUI">⚡ 2× <span></span></div>
 </div>
-
-<button id="shopButton" onclick="openShop()">
-🛒 TOKO
-</button>
-
-<div id="powerUI"></div>
-
-<div id="message"></div>
 
 <div id="joystick">
-<div id="stick"></div>
+  <div id="stick"></div>
 </div>
 
-<button id="boostBtn">
-⚡<br>BOOST
-</button>
+<button id="boostBtn">⚡ BOOST</button>
 
 </div>
 
-<!-- GAME OVER -->
+<div id="shop">
+
+  <div class="modal">
+    <h2>🛒 SHOP</h2>
+
+    <div style="margin-bottom:12px">
+      🪙 Koin: <b id="shopCoins">0</b>
+    </div>
+
+    <div class="shopItem">
+      <span>🧲 Magnet<br><small>Tarik item dari jauh</small></span>
+      <button onclick="buyPower('magnet',50)">50 🪙</button>
+    </div>
+
+    <div class="shopItem">
+      <span>🔭 Zoom<br><small>Penglihatan lebih luas</small></span>
+      <button onclick="buyPower('zoom',80)">80 🪙</button>
+    </div>
+
+    <div class="shopItem">
+      <span>💰 Bonus 5×<br><small>Nilai makanan & koin</small></span>
+      <button onclick="buyPower('bonus',100)">100 🪙</button>
+    </div>
+
+    <div class="shopItem">
+      <span>⚡ Speed 2×<br><small>Kecepatan meningkat</small></span>
+      <button onclick="buyPower('speed',100)">100 🪙</button>
+    </div>
+
+    <button class="closeBtn" onclick="closeShop()">TUTUP</button>
+  </div>
+
+</div>
+
 <div id="gameOver">
-<div class="box">
 
-<div class="overTitle">💀 KALAH!</div>
+  <div class="modal">
+    <h2>💀 GAME OVER</h2>
 
-<div id="overText">
-Permainan selesai
-</div>
+    <p id="finalText"></p>
 
-<div class="finalScore">
-⭐ <span id="finalScore">0</span>
-</div>
+    <div id="leaderboard"></div>
 
-<button class="mainBtn" onclick="restartGame()">
-🔄 MAIN LAGI
-</button>
+    <br>
 
-</div>
+    <button class="startBtn" onclick="restartGame()">
+      MAIN LAGI
+    </button>
+
+    <button class="closeBtn" onclick="backMenu()">
+      MENU
+    </button>
+  </div>
+
 </div>
 
 <script>
 
-const canvas=document.getElementById("gameCanvas");
+const canvas=document.getElementById("canvas");
 const ctx=canvas.getContext("2d");
 
 let W,H;
 
 function resize(){
-W=innerWidth;
-H=innerHeight;
-
-let dpr=Math.min(devicePixelRatio||1,2);
-
-canvas.width=W*dpr;
-canvas.height=H*dpr;
-
-canvas.style.width=W+"px";
-canvas.style.height=H+"px";
-
-ctx.setTransform(dpr,0,0,dpr,0,0);
+  W=canvas.width=window.innerWidth;
+  H=canvas.height=window.innerHeight;
 }
 
+window.addEventListener("resize",resize);
 resize();
-addEventListener("resize",resize);
 
-
-/* =========================
-   DATA
-========================= */
+const WORLD=5000;
 
 let player;
 let enemies=[];
 let foods=[];
 let coins=[];
+let particles=[];
 
 let running=false;
-let level=1;
-let kills=0;
+let gameTime=0;
 
-let worldSize=2600;
-
-let mouseX=W/2;
-let mouseY=H/2;
-
-let joystickActive=false;
-let boost=false;
-
-let lastTime=0;
-let messageTimer;
+let wallet=parseInt(localStorage.getItem("dragonCoins")||"0");
 
 let magnetTime=0;
 let zoomTime=0;
 let bonusTime=0;
 let speedTime=0;
 
+let joystickX=0;
+let joystickY=0;
 
-/* =========================
-   COIN SAVE
-========================= */
+let boost=false;
 
-let wallet=
-Number(localStorage.getItem("dragonCoins")||0);
+const keys={};
 
-function saveCoins(){
-localStorage.setItem(
-"dragonCoins",
-wallet
-);
-}
+document.addEventListener("keydown",e=>{
+  keys[e.key.toLowerCase()]=true;
 
-function updateCoinUI(){
+  if(e.code==="Space"){
+    boost=true;
+    e.preventDefault();
+  }
+});
 
-document.getElementById("coinUI")
-.innerText=wallet;
+document.addEventListener("keyup",e=>{
+  keys[e.key.toLowerCase()]=false;
 
-document.getElementById("shopCoins")
-.innerText=wallet;
-
-}
-
-
-/* =========================
-   RANDOM
-========================= */
-
-function random(a,b){
-return Math.random()*(b-a)+a;
-}
+  if(e.code==="Space"){
+    boost=false;
+  }
+});
 
 
-/* =========================
-   PLAYER
-========================= */
+// =========================
+// PLAYER
+// =========================
 
 function createPlayer(){
 
-return{
+  let x=WORLD/2;
+  let y=WORLD/2;
 
-x:0,
-y:0,
-angle:0,
-speed:2.7,
-radius:16,
-score:100,
-body:[],
-color:"#22c55e",
+  player={
+    x:x,
+    y:y,
 
-name:
-document.getElementById("playerName")
-.value.trim()||"Dimas"
+    angle:0,
 
-};
+    radius:17,
+
+    speed:2.7,
+
+    score:0,
+
+    body:[],
+
+    color:"#00d9ff",
+
+    name:document.getElementById("nameInput").value.trim() || "Player"
+  };
+
+  for(let i=0;i<35;i++){
+
+    player.body.push({
+      x:x-i*8,
+      y:y
+    });
+
+  }
+}
+
+
+// =========================
+// ENEMY
+// =========================
+
+function createEnemy(i){
+
+  let angle=Math.random()*Math.PI*2;
+  let distance=700+Math.random()*1300;
+
+  let x=player.x+Math.cos(angle)*distance;
+  let y=player.y+Math.sin(angle)*distance;
+
+  x=Math.max(200,Math.min(WORLD-200,x));
+  y=Math.max(200,Math.min(WORLD-200,y));
+
+  let level=playerLevel();
+
+  let enemyScore=
+    170+
+    level*45+
+    Math.random()*180;
+
+  let enemy={
+    x:x,
+    y:y,
+
+    angle:Math.random()*Math.PI*2,
+
+    radius:17+Math.random()*3,
+
+    score:enemyScore,
+
+    body:[],
+
+    color:[
+      "#ff3030",
+      "#ff7b00",
+      "#b400ff",
+      "#00ff66",
+      "#ff1493"
+    ][i%5],
+
+    // AI STATE
+    targetX:x,
+    targetY:y,
+
+    thinkTimer:0,
+
+    aggression:
+      0.7+
+      level*0.08+
+      Math.random()*0.25,
+
+    turnSpeed:
+      0.035+
+      Math.random()*0.025,
+
+    avoidPower:1,
+
+    flankSide:Math.random()<.5?-1:1,
+
+    personality:Math.random(),
+
+    boostTimer:0
+  };
+
+  let length=
+    30+
+    Math.floor(enemyScore/15);
+
+  length=Math.min(length,100);
+
+  for(let j=0;j<length;j++){
+
+    enemy.body.push({
+      x:x-j*8,
+      y:y
+    });
+
+  }
+
+  return enemy;
+}
+
+
+// =========================
+// LEVEL
+// =========================
+
+function playerLevel(){
+
+  return Math.min(
+    10,
+    Math.floor(player.score/100)+1
+  );
 
 }
 
 
-/* =========================
-   ENEMY
-========================= */
+// =========================
+// FOOD
+// =========================
 
-function createEnemy(index){
+function spawnFood(){
 
-let a=random(0,Math.PI*2);
-let d=random(500,2200);
+  foods.push({
 
-let x=Math.cos(a)*d;
-let y=Math.sin(a)*d;
+    x:100+Math.random()*(WORLD-200),
 
-let score=
-Math.floor(
-random(70,300)+level*25
-);
+    y:100+Math.random()*(WORLD-200),
 
-let names=[
-"Draco",
-"Shadow",
-"Blaze",
-"Titan",
-"Storm",
-"Venom",
-"DragonX",
-"King",
-"Hunter",
-"Inferno"
-];
+    value:
+      5+
+      Math.floor(Math.random()*10),
 
-let enemy={
+    size:7+Math.random()*3
 
-id:index,
-x:x,
-y:y,
+  });
 
-angle:random(0,Math.PI*2),
-targetAngle:random(0,Math.PI*2),
+}
 
-speed:1.8+level*.12,
-radius:14,
 
-score:score,
+// =========================
+// COINS
+// =========================
 
-color:
-[
-"#ff4d6d",
-"#38bdf8",
-"#a78bfa",
-"#facc15",
-"#fb923c",
-"#4ade80",
-"#f472b6"
-][Math.floor(random(0,7))],
+function spawnCoin(){
 
-name:
-names[Math.floor(random(0,names.length))],
+  coins.push({
 
-body:[],
-timer:0
+    x:100+Math.random()*(WORLD-200),
 
-};
+    y:100+Math.random()*(WORLD-200),
 
-for(
-let i=0;
-i<10+Math.floor(score/25);
-i++
+    value:1+Math.floor(Math.random()*3),
+
+    size:7
+
+  });
+
+}
+
+
+// =========================
+// DISTANCE
+// =========================
+
+function dist(ax,ay,bx,by){
+
+  return Math.hypot(ax-bx,ay-by);
+
+}
+
+
+// =========================
+// ANGLE
+// =========================
+
+function angleDiff(a,b){
+
+  return Math.atan2(
+    Math.sin(b-a),
+    Math.cos(b-a)
+  );
+
+}
+
+
+// =========================
+// COLLISION POINT
+// =========================
+
+function pointSegmentDistance(
+  px,py,
+  ax,ay,
+  bx,by
 ){
 
-enemy.body.push({
-x:x,
-y:y
-});
+  let dx=bx-ax;
+  let dy=by-ay;
 
-}
+  if(dx===0 && dy===0){
 
-return enemy;
+    return Math.hypot(px-ax,py-ay);
 
-}
+  }
 
+  let t=
+    ((px-ax)*dx+
+     (py-ay)*dy)/
+    (dx*dx+dy*dy);
 
-/* =========================
-   FOOD
-========================= */
+  t=Math.max(0,Math.min(1,t));
 
-function createFood(){
+  let cx=ax+t*dx;
+  let cy=ay+t*dy;
 
-return{
-
-x:random(-worldSize,worldSize),
-y:random(-worldSize,worldSize),
-
-value:
-Math.random()<.15?20:5,
-
-size:
-Math.random()<.15?13:10
-
-};
-
+  return Math.hypot(px-cx,py-cy);
 }
 
 
-/* =========================
-   COIN
-========================= */
+// =========================
+// PLAYER BODY COLLISION
+// =========================
 
-function createCoin(){
+function hitPlayerBody(x,y,r=0){
 
-return{
-x:random(-worldSize,worldSize),
-y:random(-worldSize,worldSize)
-};
+  // bagian kepala dilewati
+  for(let i=8;i<player.body.length;i++){
+
+    let p=player.body[i];
+
+    if(
+      dist(x,y,p.x,p.y)
+      <
+      player.radius+r+6
+    ){
+
+      return true;
+    }
+  }
+
+  return false;
+}
+
+
+// =========================
+// ENEMY BODY COLLISION
+// =========================
+
+function hitEnemyBody(enemy,x,y,r=0){
+
+  // kepala + beberapa bagian awal tidak dihitung
+  for(let i=7;i<enemy.body.length;i++){
+
+    let p=enemy.body[i];
+
+    if(
+      dist(x,y,p.x,p.y)
+      <
+      enemy.radius+r+6
+    ){
+
+      return true;
+    }
+  }
+
+  return false;
+}
+
+
+// =========================
+// SMART AI
+// =========================
+
+function updateEnemy(enemy){
+
+  let level=playerLevel();
+
+  enemy.thinkTimer--;
+
+  /*
+    AI berpikir ulang setiap beberapa frame.
+    Semakin tinggi level, semakin cepat berpikir.
+  */
+
+  if(enemy.thinkTimer<=0){
+
+    enemy.thinkTimer=
+      Math.max(5,18-level);
+
+    let dx=player.x-enemy.x;
+    let dy=player.y-enemy.y;
+
+    let distanceToPlayer=Math.hypot(dx,dy);
+
+    /*
+      ============================
+      1. DETEKSI BADAN PLAYER
+      ============================
+    */
+
+    let nearestBody=null;
+    let nearestDist=Infinity;
+
+    for(
+      let i=8;
+      i<player.body.length;
+      i+=2
+    ){
+
+      let p=player.body[i];
+
+      let d=dist(
+        enemy.x,
+        enemy.y,
+        p.x,
+        p.y
+      );
+
+      if(d<nearestDist){
+
+        nearestDist=d;
+        nearestBody=p;
+
+      }
+
+    }
+
+
+    /*
+      ============================
+      2. PREDIKSI GERAK PLAYER
+      ============================
+    */
+
+    let prediction=
+      70+
+      level*12;
+
+    let predictedX=
+      player.x+
+      Math.cos(player.angle)*
+      prediction;
+
+    let predictedY=
+      player.y+
+      Math.sin(player.angle)*
+      prediction;
+
+
+    /*
+      ============================
+      3. CEK APAKAH JALUR AMAN
+      ============================
+    */
+
+    let danger=false;
+
+    let futureX=
+      enemy.x+
+      Math.cos(enemy.angle)*120;
+
+    let futureY=
+      enemy.y+
+      Math.sin(enemy.angle)*120;
+
+    if(
+      hitPlayerBody(
+        futureX,
+        futureY,
+        enemy.radius
+      )
+    ){
+
+      danger=true;
+
+    }
+
+
+    /*
+      ============================
+      4. HINDARI BADAN PLAYER
+      ============================
+    */
+
+    if(danger){
+
+      // belok menjauh dari badan
+      let awayAngle=
+        Math.atan2(
+          enemy.y-player.y,
+          enemy.x-player.x
+        );
+
+      // geser ke samping
+      let sideAngle=
+        awayAngle+
+        enemy.flankSide*Math.PI/2;
+
+      enemy.targetX=
+        enemy.x+
+        Math.cos(sideAngle)*350;
+
+      enemy.targetY=
+        enemy.y+
+        Math.sin(sideAngle)*350;
+
+    }
+
+
+    /*
+      ============================
+      5. JIKA LEBIH LEMAH
+      ============================
+    */
+
+    else if(enemy.score<player.score){
+
+      /*
+        Jangan tabrak kepala player.
+        Cari badan bagian samping/belakang.
+      */
+
+      let sideDistance=
+        150+
+        level*15;
+
+      let sideAngle=
+        player.angle+
+        enemy.flankSide*Math.PI/2;
+
+      enemy.targetX=
+        player.x+
+        Math.cos(sideAngle)*sideDistance;
+
+      enemy.targetY=
+        player.y+
+        Math.sin(sideAngle)*sideDistance;
+
+    }
+
+
+    /*
+      ============================
+      6. JIKA LEBIH KUAT
+      ============================
+    */
+
+    else{
+
+      /*
+        Musuh kuat mencoba memotong
+        jalur player, bukan mengejar
+        posisi kepala secara lurus.
+      */
+
+      enemy.targetX=predictedX;
+      enemy.targetY=predictedY;
+
+      /*
+        Jika sudah terlalu dekat dengan kepala,
+        geser ke samping agar tidak mati
+        head-to-head.
+      */
+
+      if(distanceToPlayer<230){
+
+        let sideAngle=
+          player.angle+
+          enemy.flankSide*Math.PI/2;
+
+        enemy.targetX=
+          player.x+
+          Math.cos(sideAngle)*130;
+
+        enemy.targetY=
+          player.y+
+          Math.sin(sideAngle)*130;
+
+      }
+
+    }
+
+
+    /*
+      ============================
+      7. CARI MAKANAN
+      ============================
+    */
+
+    if(
+      distanceToPlayer>
+      900+
+      level*100
+    ){
+
+      let nearestFood=null;
+      let fd=Infinity;
+
+      for(let f of foods){
+
+        let d=
+          dist(enemy.x,enemy.y,f.x,f.y);
+
+        if(d<fd){
+
+          fd=d;
+          nearestFood=f;
+
+        }
+
+      }
+
+      if(nearestFood){
+
+        enemy.targetX=nearestFood.x;
+        enemy.targetY=nearestFood.y;
+
+      }
+
+    }
+
+    /*
+      ============================
+      8. JANGAN TABRAK BADAN SENDIRI
+      ============================
+    */
+
+    let selfDanger=false;
+
+    for(
+      let i=10;
+      i<enemy.body.length;
+      i+=3
+    ){
+
+      let p=enemy.body[i];
+
+      if(
+        dist(
+          futureX,
+          futureY,
+          p.x,
+          p.y
+        )<
+        enemy.radius*2.5
+      ){
+
+        selfDanger=true;
+        break;
+
+      }
+
+    }
+
+    if(selfDanger){
+
+      let escapeAngle=
+        enemy.angle+
+        enemy.flankSide*1.3;
+
+      enemy.targetX=
+        enemy.x+
+        Math.cos(escapeAngle)*250;
+
+      enemy.targetY=
+        enemy.y+
+        Math.sin(escapeAngle)*250;
+
+    }
+
+  }
+
+
+  /*
+    ============================
+    MOVEMENT
+    ============================
+  */
+
+  let targetAngle=
+    Math.atan2(
+      enemy.targetY-enemy.y,
+      enemy.targetX-enemy.x
+    );
+
+  let diff=
+    angleDiff(
+      enemy.angle,
+      targetAngle
+    );
+
+  /*
+    Musuh lebih responsif di level tinggi.
+  */
+
+  let turn=
+    enemy.turnSpeed+
+    level*.0025;
+
+  if(diff>turn)
+    enemy.angle+=turn;
+
+  else if(diff<-turn)
+    enemy.angle-=turn;
+
+  else
+    enemy.angle=targetAngle;
+
+
+  /*
+    ============================
+    SPEED HARD
+    ============================
+  */
+
+  let speed=
+    2.3+
+    level*.17+
+    enemy.aggression*.25;
+
+  /*
+    Boost sesekali ketika mengejar.
+  */
+
+  let dPlayer=
+    dist(
+      enemy.x,
+      enemy.y,
+      player.x,
+      player.y
+    );
+
+  if(
+    dPlayer<650 &&
+    enemy.score>=player.score
+  ){
+
+    speed*=1.18;
+
+  }
+
+
+  enemy.x+=
+    Math.cos(enemy.angle)*speed;
+
+  enemy.y+=
+    Math.sin(enemy.angle)*speed;
+
+
+  /*
+    Batas dunia
+  */
+
+  if(enemy.x<100){
+
+    enemy.x=100;
+    enemy.angle=0;
+
+  }
+
+  if(enemy.x>WORLD-100){
+
+    enemy.x=WORLD-100;
+    enemy.angle=Math.PI;
+
+  }
+
+  if(enemy.y<100){
+
+    enemy.y=100;
+    enemy.angle=Math.PI/2;
+
+  }
+
+  if(enemy.y>WORLD-100){
+
+    enemy.y=WORLD-100;
+    enemy.angle=-Math.PI/2;
+
+  }
+
+
+  /*
+    Update badan
+  */
+
+  enemy.body[0].x=enemy.x;
+  enemy.body[0].y=enemy.y;
+
+  for(let i=1;i<enemy.body.length;i++){
+
+    let prev=enemy.body[i-1];
+    let cur=enemy.body[i];
+
+    let dx=prev.x-cur.x;
+    let dy=prev.y-cur.y;
+
+    let d=Math.hypot(dx,dy);
+
+    if(d>8){
+
+      cur.x+=dx/d*(d-8);
+      cur.y+=dy/d*(d-8);
+
+    }
+
+  }
 
 }
 
 
-/* =========================
-   START
-========================= */
+// =========================
+// PLAYER UPDATE
+// =========================
 
-function startGame(){
+function updatePlayer(){
 
-document.getElementById("menu").style.display="none";
-document.getElementById("gameOver").style.display="none";
+  let dx=0;
+  let dy=0;
 
-level=1;
-kills=0;
+  if(keys["w"]||keys["arrowup"])
+    dy-=1;
 
-magnetTime=0;
-zoomTime=0;
-bonusTime=0;
-speedTime=0;
+  if(keys["s"]||keys["arrowdown"])
+    dy+=1;
 
-player=createPlayer();
+  if(keys["a"]||keys["arrowleft"])
+    dx-=1;
 
-enemies=[];
-foods=[];
-coins=[];
+  if(keys["d"]||keys["arrowright"])
+    dx+=1;
 
-for(let i=0;i<8;i++)
-enemies.push(createEnemy(i));
 
-for(let i=0;i<180;i++)
-foods.push(createFood());
+  if(
+    Math.abs(joystickX)>.1 ||
+    Math.abs(joystickY)>.1
+  ){
 
-for(let i=0;i<40;i++)
-coins.push(createCoin());
+    dx=joystickX;
+    dy=joystickY;
 
-for(let i=0;i<12;i++){
+  }
 
-player.body.push({
-x:player.x,
-y:player.y
-});
+
+  if(dx!==0 || dy!==0){
+
+    let d=Math.hypot(dx,dy);
+
+    dx/=d;
+    dy/=d;
+
+    player.angle=
+      Math.atan2(dy,dx);
+
+  }
+
+
+  let speed=
+    player.speed;
+
+  if(speedTime>0)
+    speed*=2;
+
+  if(boost)
+    speed*=1.65;
+
+
+  player.x+=
+    Math.cos(player.angle)*speed;
+
+  player.y+=
+    Math.sin(player.angle)*speed;
+
+
+  /*
+    WORLD BORDER
+  */
+
+  player.x=
+    Math.max(
+      100,
+      Math.min(WORLD-100,player.x)
+    );
+
+  player.y=
+    Math.max(
+      100,
+      Math.min(WORLD-100,player.y)
+    );
+
+
+  /*
+    BODY
+  */
+
+  player.body[0].x=player.x;
+  player.body[0].y=player.y;
+
+  for(let i=1;i<player.body.length;i++){
+
+    let prev=player.body[i-1];
+    let cur=player.body[i];
+
+    let dx=prev.x-cur.x;
+    let dy=prev.y-cur.y;
+
+    let d=Math.hypot(dx,dy);
+
+    if(d>8){
+
+      cur.x+=dx/d*(d-8);
+      cur.y+=dy/d*(d-8);
+
+    }
+
+  }
 
 }
 
-running=true;
 
-updateCoinUI();
-
-showMessage(
-"🔥 BATTLE DIMULAI!",
-1200
-);
-
-lastTime=performance.now();
-
-requestAnimationFrame(gameLoop);
-
-}
-
-
-/* =========================
-   FOOD SUCTION
-========================= */
+// =========================
+// SUCTION
+// =========================
 
 function suctionRange(){
 
-let base=
-player.radius*1.5;
+  if(magnetTime>0)
+    return 280;
 
-if(magnetTime>0)
-return 280;
-
-return base;
+  return player.radius*1.5;
 
 }
 
 
 function suckItems(){
 
-let range=suctionRange();
+  let range=suctionRange();
 
-let bonus=
-bonusTime>0?5:1;
+  for(let f of foods){
 
+    let d=
+      dist(
+        player.x,
+        player.y,
+        f.x,
+        f.y
+      );
 
-/* FOOD */
+    if(d<range){
 
-foods.forEach(food=>{
+      let force=
+        magnetTime>0
+        ? .12
+        : .05;
 
-let dx=player.x-food.x;
-let dy=player.y-food.y;
+      f.x+=
+        (player.x-f.x)*force;
 
-let d=Math.hypot(dx,dy);
+      f.y+=
+        (player.y-f.y)*force;
 
-if(d<range){
+    }
 
-let force=
-magnetTime>0?.12:.18;
+  }
 
-food.x+=dx*force;
-food.y+=dy*force;
+  for(let c of coins){
 
-}
+    let d=
+      dist(
+        player.x,
+        player.y,
+        c.x,
+        c.y
+      );
 
-});
+    if(d<range){
 
+      c.x+=
+        (player.x-c.x)*.14;
 
-/* COINS */
+      c.y+=
+        (player.y-c.y)*.14;
 
-coins.forEach(coin=>{
+    }
 
-let dx=player.x-coin.x;
-let dy=player.y-coin.y;
-
-let d=Math.hypot(dx,dy);
-
-if(d<range){
-
-let force=
-magnetTime>0?.12:.18;
-
-coin.x+=dx*force;
-coin.y+=dy*force;
-
-}
-
-});
-
-}
-
-
-/* =========================
-   PLAYER UPDATE
-========================= */
-
-function updatePlayer(){
-
-if(!joystickActive){
-
-let dx=mouseX-W/2;
-let dy=mouseY-H/2;
-
-if(Math.hypot(dx,dy)>15)
-player.angle=Math.atan2(dy,dx);
+  }
 
 }
 
 
-let speed=
-boost?4.8:2.7;
-
-if(speedTime>0)
-speed*=2;
-
-
-player.x+=
-Math.cos(player.angle)*speed;
-
-player.y+=
-Math.sin(player.angle)*speed;
-
-
-/* WRAP */
-
-if(player.x>worldSize)
-player.x=-worldSize;
-
-if(player.x<-worldSize)
-player.x=worldSize;
-
-if(player.y>worldSize)
-player.y=-worldSize;
-
-if(player.y<-worldSize)
-player.y=worldSize;
-
-
-/* BODY */
-
-player.body.unshift({
-x:player.x,
-y:player.y
-});
-
-let wanted=
-12+
-Math.floor(player.score/5);
-
-while(player.body.length>wanted)
-player.body.pop();
-
-}
-
-
-/* =========================
-   ENEMY AI
-========================= */
-
-function updateEnemies(){
-
-enemies.forEach(enemy=>{
-
-enemy.timer--;
-
-let dx=player.x-enemy.x;
-let dy=player.y-enemy.y;
-
-let dist=Math.hypot(dx,dy);
-
-let range=850+level*90;
-
-if(dist<range){
-
-let predict=120+level*20;
-
-let tx=
-player.x+
-Math.cos(player.angle)*predict;
-
-let ty=
-player.y+
-Math.sin(player.angle)*predict;
-
-enemy.targetAngle=
-Math.atan2(
-ty-enemy.y,
-tx-enemy.x
-);
-
-enemy.speed=
-2+level*.14;
-
-if(enemy.score>player.score)
-enemy.speed+=.5;
-
-}else{
-
-if(enemy.timer<=0){
-
-enemy.timer=random(30,100);
-
-let nearest=null;
-let nd=Infinity;
-
-foods.forEach(food=>{
-
-let d=
-Math.hypot(
-enemy.x-food.x,
-enemy.y-food.y
-);
-
-if(d<nd){
-nd=d;
-nearest=food;
-}
-
-});
-
-if(nearest){
-
-enemy.targetAngle=
-Math.atan2(
-nearest.y-enemy.y,
-nearest.x-enemy.x
-);
-
-}else{
-
-enemy.targetAngle=
-random(0,Math.PI*2);
-
-}
-
-}
-
-enemy.speed=
-1.7+level*.1;
-
-}
-
-
-/* TURN */
-
-let diff=
-enemy.targetAngle-enemy.angle;
-
-while(diff>Math.PI)
-diff-=Math.PI*2;
-
-while(diff<-Math.PI)
-diff+=Math.PI*2;
-
-enemy.angle+=
-diff*(.055+level*.003);
-
-
-/* MOVE */
-
-enemy.x+=
-Math.cos(enemy.angle)*enemy.speed;
-
-enemy.y+=
-Math.sin(enemy.angle)*enemy.speed;
-
-
-/* WRAP */
-
-if(enemy.x>worldSize)
-enemy.x=-worldSize;
-
-if(enemy.x<-worldSize)
-enemy.x=worldSize;
-
-if(enemy.y>worldSize)
-enemy.y=-worldSize;
-
-if(enemy.y<-worldSize)
-enemy.y=worldSize;
-
-
-/* BODY */
-
-enemy.body.unshift({
-x:enemy.x,
-y:enemy.y
-});
-
-let wanted=
-12+
-Math.floor(enemy.score/5);
-
-while(enemy.body.length>wanted)
-enemy.body.pop();
-
-});
-
-}
-
-
-/* =========================
-   EAT
-========================= */
+// =========================
+// EAT FOOD
+// =========================
 
 function eatFood(){
 
-let range=
-player.radius+
-12;
+  for(let i=foods.length-1;i>=0;i--){
 
-let multiplier=
-bonusTime>0?5:1;
+    let f=foods[i];
 
+    if(
+      dist(
+        player.x,
+        player.y,
+        f.x,
+        f.y
+      )<
+      player.radius+f.size+5
+    ){
 
-/* FOOD */
+      let value=f.value;
 
-for(let i=foods.length-1;i>=0;i--){
+      if(bonusTime>0)
+        value*=5;
 
-let f=foods[i];
+      player.score+=value;
 
-let d=
-Math.hypot(
-player.x-f.x,
-player.y-f.y
-);
+      /*
+        Tambah badan
+      */
 
-if(d<range){
+      for(let j=0;j<Math.max(1,Math.floor(value/5));j++){
 
-player.score+=
-f.value*multiplier;
+        let last=
+          player.body[player.body.length-1];
 
-foods.splice(i,1);
-foods.push(createFood());
+        player.body.push({
+          x:last.x,
+          y:last.y
+        });
 
-}
+      }
 
-}
+      foods.splice(i,1);
 
+    }
 
-/* COINS */
-
-for(let i=coins.length-1;i>=0;i--){
-
-let c=coins[i];
-
-let d=
-Math.hypot(
-player.x-c.x,
-player.y-c.y
-);
-
-if(d<range){
-
-wallet+=
-bonusTime>0?5:1;
-
-saveCoins();
-updateCoinUI();
-
-coins.splice(i,1);
-coins.push(createCoin());
-
-showMessage(
-"🪙 KOIN!",
-500
-);
-
-}
-
-}
-
-}
+  }
 
 
-/* =========================
-   HEAD BATTLE
-========================= */
+  for(let i=coins.length-1;i>=0;i--){
 
-function headBattle(){
+    let c=coins[i];
 
-for(let i=enemies.length-1;i>=0;i--){
+    if(
+      dist(
+        player.x,
+        player.y,
+        c.x,
+        c.y
+      )<
+      player.radius+c.size+6
+    ){
 
-let e=enemies[i];
+      let value=c.value;
 
-let d=
-Math.hypot(
-player.x-e.x,
-player.y-e.y
-);
+      if(bonusTime>0)
+        value*=5;
 
-if(
-d<
-player.radius+
-e.radius+
-5
-){
+      wallet+=value;
 
-if(player.score>e.score){
+      localStorage.setItem(
+        "dragonCoins",
+        wallet
+      );
 
-let reward=
-Math.floor(e.score*.6);
+      coins.splice(i,1);
 
-player.score+=reward;
+    }
 
-kills++;
-
-dropEnemyFood(e);
-
-showMessage(
-"⚔️ "+e.name+
-" KALAH! +"+
-reward,
-1100
-);
-
-enemies.splice(i,1);
-enemies.push(
-createEnemy(Math.random()*9999)
-);
-
-}else{
-
-gameOver(
-"💀 "+e.name+
-" mengalahkanmu!"
-);
-
-return;
-
-}
-
-}
-
-}
+  }
 
 }
 
 
-/* =========================
-   BODY COLLISION
-========================= */
+// =========================
+// COLLISION SYSTEM
+// =========================
 
-function bodyCollision(){
+function checkCollisions(){
 
-/* PLAYER HEAD -> ENEMY BODY */
+  /*
+    =================================================
+    PRIORITAS #1
+    KEPALA MUSUH MENABRAK BADAN PLAYER
+    =================================================
 
-for(let i=enemies.length-1;i>=0;i--){
+    Musuh mati.
+    Player mendapatkan score.
 
-let e=enemies[i];
+    Ini sengaja diperiksa PALING AWAL supaya
+    musuh yang mencoba menyerang badan player
+    tidak tiba-tiba kalah head-to-head.
+  */
 
-for(let j=7;j<e.body.length;j+=2){
+  for(let i=enemies.length-1;i>=0;i--){
 
-let p=e.body[j];
+    let e=enemies[i];
 
-let d=
-Math.hypot(
-player.x-p.x,
-player.y-p.y
-);
+    if(
+      hitPlayerBody(
+        e.x,
+        e.y,
+        e.radius
+      )
+    ){
 
-if(
-d<
-player.radius+
-e.radius*.7
-){
+      let reward=
+        Math.floor(e.score*.15)+50;
 
-gameOver(
-"💀 Kamu menabrak badan "+
-e.name+"!"
-);
+      player.score+=reward;
 
-return;
+      createExplosion(
+        e.x,
+        e.y,
+        e.color
+      );
 
-}
+      /*
+        Musuh tidak langsung hilang begitu saja.
+        Pecah menjadi makanan.
+      */
 
-}
+      for(let k=0;k<10;k++){
 
-}
+        foods.push({
 
+          x:e.x+(Math.random()-.5)*120,
 
-/* ENEMY HEAD -> PLAYER BODY */
+          y:e.y+(Math.random()-.5)*120,
 
-for(let i=enemies.length-1;i>=0;i--){
+          value:8+Math.floor(Math.random()*12),
 
-let e=enemies[i];
+          size:8
 
-for(let j=8;j<player.body.length;j+=2){
+        });
 
-let p=player.body[j];
+      }
 
-let d=
-Math.hypot(
-e.x-p.x,
-e.y-p.y
-);
+      enemies.splice(i,1);
 
-if(
-d<
-e.radius+
-player.radius*.7
-){
+      continue;
 
-let reward=
-Math.floor(e.score*.7);
-
-player.score+=reward;
-
-kills++;
-
-dropEnemyFood(e);
-
-showMessage(
-"💥 "+e.name+
-" MENABRAK BADANMU! +"+
-reward,
-1300
-);
-
-enemies.splice(i,1);
-
-enemies.push(
-createEnemy(Math.random()*9999)
-);
-
-break;
-
-}
-
-}
-
-}
-
-}
+    }
 
 
-/* =========================
-   DROP FOOD
-========================= */
+    /*
+      =================================================
+      PRIORITAS #2
+      KEPALA PLAYER MENABRAK BADAN MUSUH
+      =================================================
+    */
 
-function dropEnemyFood(e){
+    if(
+      hitEnemyBody(
+        e,
+        player.x,
+        player.y,
+        player.radius
+      )
+    ){
 
-let amount=
-Math.min(
-35,
-Math.max(
-12,
-Math.floor(e.body.length/2)
-)
-);
+      gameOver();
 
-for(let i=0;i<amount;i++){
+      return;
 
-let p=
-e.body[
-Math.floor(
-Math.random()*e.body.length
-)
-];
-
-foods.push({
-
-x:p.x+random(-40,40),
-y:p.y+random(-40,40),
-
-value:
-Math.random()<.25?20:5,
-
-size:
-Math.random()<.25?13:10
-
-});
-
-}
-
-}
+    }
 
 
-/* =========================
-   LEVEL
-========================= */
+    /*
+      =================================================
+      PRIORITAS #3
+      HEAD TO HEAD
+      =================================================
+    */
 
-function updateLevel(){
+    let d=
+      dist(
+        player.x,
+        player.y,
+        e.x,
+        e.y
+      );
 
-let newLevel=
-Math.min(
-10,
-1+
-Math.floor(player.score/150)
-);
+    if(
+      d<
+      player.radius+
+      e.radius+
+      5
+    ){
 
-if(newLevel>level){
+      if(player.score>e.score){
 
-level=newLevel;
+        player.score+=
+          Math.floor(e.score*.1);
 
-showMessage(
-"🔥 LEVEL "+level,
-1200
-);
+        createExplosion(
+          e.x,
+          e.y,
+          e.color
+        );
 
-if(enemies.length<
-Math.min(15,8+level)
-){
+        enemies.splice(i,1);
 
-enemies.push(
-createEnemy(Math.random()*9999)
-);
+      }
+      else{
 
-}
+        gameOver();
 
-}
+        return;
+
+      }
+
+    }
+
+  }
 
 }
 
 
-/* =========================
-   POWER TIMER
-========================= */
+// =========================
+// EXPLOSION
+// =========================
 
-function updatePowers(){
+function createExplosion(x,y,color){
 
-/*
-  frame kira-kira 60 fps
-*/
+  for(let i=0;i<20;i++){
 
-if(magnetTime>0)
-magnetTime--;
+    particles.push({
 
-if(zoomTime>0)
-zoomTime--;
+      x:x,
+      y:y,
 
-if(bonusTime>0)
-bonusTime--;
+      vx:(Math.random()-.5)*5,
+      vy:(Math.random()-.5)*5,
 
-if(speedTime>0)
-speedTime--;
+      life:30+Math.random()*30,
 
-let html="";
+      color:color
 
-if(magnetTime>0)
-html+=
-`<div class="power">🧲 Magnet ${Math.ceil(magnetTime/60)}s</div>`;
+    });
 
-if(zoomTime>0)
-html+=
-`<div class="power">🔍 Zoom ${Math.ceil(zoomTime/60)}s</div>`;
-
-if(bonusTime>0)
-html+=
-`<div class="power">✖️5 Bonus ${Math.ceil(bonusTime/60)}s</div>`;
-
-if(speedTime>0)
-html+=
-`<div class="power">⚡ Speed 2× ${Math.ceil(speedTime/60)}s</div>`;
-
-document.getElementById("powerUI").innerHTML=html;
+  }
 
 }
 
 
-/* =========================
-   DRAW
-========================= */
+// =========================
+// PARTICLES
+// =========================
+
+function updateParticles(){
+
+  for(let i=particles.length-1;i>=0;i--){
+
+    let p=particles[i];
+
+    p.x+=p.vx;
+    p.y+=p.vy;
+
+    p.life--;
+
+    if(p.life<=0)
+      particles.splice(i,1);
+
+  }
+
+}
+
+
+// =========================
+// DRAW SNAKE
+// =========================
+
+function drawSnake(snake,isPlayer=false){
+
+  /*
+    Body
+  */
+
+  for(
+    let i=snake.body.length-1;
+    i>=0;
+    i--
+  ){
+
+    let p=snake.body[i];
+
+    ctx.beginPath();
+
+    let r=
+      snake.radius-
+      Math.min(
+        3,
+        i*.015
+      );
+
+    ctx.arc(
+      p.x,
+      p.y,
+      Math.max(8,r),
+      0,
+      Math.PI*2
+    );
+
+    ctx.fillStyle=
+      isPlayer
+      ? (
+        i%2===0
+        ? "#00e5ff"
+        : "#008cff"
+      )
+      : snake.color;
+
+    ctx.fill();
+
+  }
+
+
+  /*
+    HEAD
+  */
+
+  ctx.beginPath();
+
+  ctx.arc(
+    snake.x,
+    snake.y,
+    snake.radius+2,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fillStyle=
+    isPlayer
+    ? "#00ffff"
+    : snake.color;
+
+  ctx.fill();
+
+
+  /*
+    Eyes
+  */
+
+  let ex=
+    Math.cos(snake.angle);
+
+  let ey=
+    Math.sin(snake.angle);
+
+  let px=-ey;
+  let py=ex;
+
+  for(let side of [-1,1]){
+
+    ctx.beginPath();
+
+    ctx.arc(
+      snake.x+
+      ex*8+
+      px*side*6,
+
+      snake.y+
+      ey*8+
+      py*side*6,
+
+      3.5,
+
+      0,
+      Math.PI*2
+    );
+
+    ctx.fillStyle="white";
+    ctx.fill();
+
+    ctx.beginPath();
+
+    ctx.arc(
+      snake.x+
+      ex*9+
+      px*side*6,
+
+      snake.y+
+      ey*9+
+      py*side*6,
+
+      1.7,
+
+      0,
+      Math.PI*2
+    );
+
+    ctx.fillStyle="black";
+    ctx.fill();
+
+  }
+
+}
+
+
+// =========================
+// DRAW WORLD
+// =========================
 
 function drawWorld(){
 
-ctx.fillStyle="#071522";
-ctx.fillRect(0,0,W,H);
+  ctx.clearRect(0,0,W,H);
 
-ctx.save();
+  let zoom=
+    zoomTime>0
+    ? .72
+    : 1;
 
+  ctx.save();
 
-/*
-  ZOOM
-*/
+  ctx.translate(W/2,H/2);
 
-let zoom=
-zoomTime>0?.72:1;
+  ctx.scale(zoom,zoom);
 
-ctx.translate(W/2,H/2);
-ctx.scale(zoom,zoom);
-ctx.translate(-player.x,-player.y);
+  ctx.translate(
+    -player.x,
+    -player.y
+  );
 
 
-/* GRID */
+  /*
+    Background
+  */
 
-ctx.strokeStyle=
-"rgba(255,255,255,.045)";
+  ctx.fillStyle="#101010";
 
-ctx.lineWidth=1;
+  ctx.fillRect(
+    0,
+    0,
+    WORLD,
+    WORLD
+  );
 
-for(
-let x=-worldSize;
-x<=worldSize;
-x+=100
-){
 
-ctx.beginPath();
-ctx.moveTo(x,-worldSize);
-ctx.lineTo(x,worldSize);
-ctx.stroke();
+  /*
+    Grid
+  */
 
-}
+  ctx.strokeStyle=
+    "rgba(255,255,255,.035)";
 
-for(
-let y=-worldSize;
-y<=worldSize;
-y+=100
-){
+  ctx.lineWidth=1;
 
-ctx.beginPath();
-ctx.moveTo(-worldSize,y);
-ctx.lineTo(worldSize,y);
-ctx.stroke();
+  for(
+    let x=0;
+    x<=WORLD;
+    x+=100
+  ){
 
-}
+    ctx.beginPath();
 
+    ctx.moveTo(x,0);
+    ctx.lineTo(x,WORLD);
 
-/* BORDER */
+    ctx.stroke();
 
-ctx.strokeStyle=
-"rgba(56,189,248,.3)";
+  }
 
-ctx.lineWidth=8;
+  for(
+    let y=0;
+    y<=WORLD;
+    y+=100
+  ){
 
-ctx.strokeRect(
--worldSize,
--worldSize,
-worldSize*2,
-worldSize*2
-);
+    ctx.beginPath();
 
+    ctx.moveTo(0,y);
+    ctx.lineTo(WORLD,y);
 
-drawFoods();
-drawCoins();
+    ctx.stroke();
 
-enemies.forEach(drawSnake);
+  }
 
-drawSnake(player);
 
+  /*
+    Food
+  */
 
-ctx.restore();
+  for(let f of foods){
 
-}
+    ctx.font=
+      `${f.size*2.2}px Arial`;
 
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
 
-/* =========================
-   CAKE
-========================= */
+    ctx.fillText(
+      "🍰",
+      f.x,
+      f.y
+    );
 
-function drawFoods(){
+  }
 
-foods.forEach(f=>{
 
-ctx.save();
+  /*
+    Coins
+  */
 
-ctx.translate(f.x,f.y);
+  for(let c of coins){
 
-if(f.value>=20){
+    ctx.beginPath();
 
-ctx.shadowColor="#ffd43b";
-ctx.shadowBlur=15;
+    ctx.arc(
+      c.x,
+      c.y,
+      c.size,
+      0,
+      Math.PI*2
+    );
 
-}
+    ctx.fillStyle="#ffd700";
+    ctx.fill();
 
-ctx.fillStyle="#d89452";
+    ctx.strokeStyle="#fff2a0";
+    ctx.stroke();
 
-ctx.beginPath();
+    ctx.fillStyle="#8b6500";
 
-ctx.roundRect(
--f.size,
--f.size/2,
-f.size*2,
-f.size*1.25,
-5
-);
+    ctx.font="8px Arial";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
 
-ctx.fill();
+    ctx.fillText(
+      "★",
+      c.x,
+      c.y
+    );
 
-ctx.shadowBlur=0;
+  }
 
-ctx.fillStyle="#fff4dc";
 
-ctx.beginPath();
+  /*
+    Enemies
+  */
 
-ctx.ellipse(
-0,
--f.size/2,
-f.size,
-f.size*.42,
-0,
-0,
-Math.PI*2
-);
+  for(let e of enemies){
 
-ctx.fill();
+    drawSnake(e,false);
 
-ctx.fillStyle="#713f12";
+    /*
+      Enemy name + score
+    */
 
-ctx.beginPath();
+    ctx.font="bold 11px Arial";
 
-ctx.arc(-f.size*.4,0,2.5,0,Math.PI*2);
-ctx.arc(f.size*.35,-2,2.5,0,Math.PI*2);
+    ctx.textAlign="center";
 
-ctx.fill();
+    ctx.fillStyle="white";
 
-ctx.restore();
+    ctx.fillText(
+      "HARD • "+Math.floor(e.score),
+      e.x,
+      e.y-e.radius-10
+    );
 
-});
+  }
 
-}
 
+  /*
+    Player
+  */
 
-/* =========================
-   COINS
-========================= */
+  drawSnake(player,true);
 
-function drawCoins(){
 
-coins.forEach(c=>{
+  /*
+    Particles
+  */
 
-ctx.save();
+  for(let p of particles){
 
-ctx.translate(c.x,c.y);
+    ctx.globalAlpha=
+      Math.max(0,p.life/50);
 
-ctx.shadowColor="#ffd43b";
-ctx.shadowBlur=10;
+    ctx.beginPath();
 
-ctx.beginPath();
+    ctx.arc(
+      p.x,
+      p.y,
+      3,
+      0,
+      Math.PI*2
+    );
 
-ctx.arc(
-0,0,
-10,
-0,
-Math.PI*2
-);
+    ctx.fillStyle=p.color;
 
-ctx.fillStyle="#ffd43b";
-ctx.fill();
+    ctx.fill();
 
-ctx.shadowBlur=0;
+  }
 
-ctx.fillStyle="#704800";
-ctx.font="bold 12px Arial";
-ctx.textAlign="center";
-ctx.textBaseline="middle";
+  ctx.globalAlpha=1;
 
-ctx.fillText("$",0,1);
-
-ctx.restore();
-
-});
-
-}
-
-
-/* =========================
-   SNAKE
-========================= */
-
-function drawSnake(s){
-
-for(
-let i=s.body.length-1;
-i>=0;
-i--
-){
-
-let p=s.body[i];
-
-let r=
-s.radius*
-(.65+(i/s.body.length)*.35);
-
-ctx.beginPath();
-
-ctx.arc(
-p.x,
-p.y,
-r,
-0,
-Math.PI*2
-);
-
-ctx.fillStyle=s.color;
-ctx.fill();
-
-if(i%5===0){
-
-ctx.beginPath();
-
-ctx.arc(
-p.x-r*.2,
-p.y-r*.2,
-r*.22,
-0,
-Math.PI*2
-);
-
-ctx.fillStyle="rgba(255,255,255,.25)";
-ctx.fill();
-
-}
+  ctx.restore();
 
 }
 
 
-/* HEAD */
+// =========================
+// POWER TIMER
+// =========================
 
-ctx.save();
+function updatePowers(){
 
-ctx.translate(s.x,s.y);
-ctx.rotate(s.angle);
+  if(magnetTime>0)
+    magnetTime--;
 
-ctx.beginPath();
+  if(zoomTime>0)
+    zoomTime--;
 
-ctx.arc(
-0,
-0,
-s.radius+2,
-0,
-Math.PI*2
-);
+  if(bonusTime>0)
+    bonusTime--;
 
-ctx.fillStyle=s.color;
-ctx.fill();
+  if(speedTime>0)
+    speedTime--;
 
 
-/* HORNS */
-
-ctx.fillStyle="white";
-
-ctx.beginPath();
-
-ctx.moveTo(-5,-s.radius);
-ctx.lineTo(-11,-s.radius-10);
-ctx.lineTo(1,-s.radius-5);
-ctx.fill();
-
-ctx.beginPath();
-
-ctx.moveTo(-5,s.radius);
-ctx.lineTo(-11,s.radius+10);
-ctx.lineTo(1,s.radius+5);
-ctx.fill();
-
-
-/* EYES */
-
-ctx.fillStyle="white";
-
-ctx.beginPath();
-
-ctx.arc(7,-6,4,0,Math.PI*2);
-ctx.arc(7,6,4,0,Math.PI*2);
-
-ctx.fill();
-
-ctx.fillStyle="#111";
-
-ctx.beginPath();
-
-ctx.arc(8,-6,2,0,Math.PI*2);
-ctx.arc(8,6,2,0,Math.PI*2);
-
-ctx.fill();
-
-
-/* MOUTH */
-
-ctx.strokeStyle="#111";
-ctx.lineWidth=2;
-
-ctx.beginPath();
-
-ctx.moveTo(10,0);
-ctx.lineTo(s.radius+8,0);
-
-ctx.stroke();
-
-ctx.restore();
-
-
-/* NAME */
-
-ctx.fillStyle="white";
-ctx.font="bold 12px Arial";
-ctx.textAlign="center";
-ctx.shadowColor="#000";
-ctx.shadowBlur=5;
-
-ctx.fillText(
-s.name,
-s.x,
-s.y-s.radius-17
-);
-
-ctx.shadowBlur=0;
-
-
-/*
-  JANGKAUAN HISAP
-*/
-
-if(s===player){
-
-let range=suctionRange();
-
-ctx.beginPath();
-
-ctx.arc(
-s.x,
-s.y,
-range,
-0,
-Math.PI*2
-);
-
-ctx.strokeStyle=
-magnetTime>0
-?"rgba(255,212,59,.35)"
-:"rgba(255,255,255,.06)";
-
-ctx.lineWidth=2;
-ctx.stroke();
-
-}
+  updatePowerUI();
 
 }
 
 
-/* =========================
-   UI
-========================= */
+function updatePowerUI(){
+
+  setPower(
+    "magnetUI",
+    magnetTime
+  );
+
+  setPower(
+    "zoomUI",
+    zoomTime
+  );
+
+  setPower(
+    "bonusUI",
+    bonusTime
+  );
+
+  setPower(
+    "speedUI",
+    speedTime
+  );
+
+}
+
+
+function setPower(id,time){
+
+  let el=
+    document.getElementById(id);
+
+  if(time>0){
+
+    el.style.display="block";
+
+    let sec=
+      Math.ceil(time/60);
+
+    el.querySelector("span").textContent=
+      sec+"s";
+
+  }
+  else{
+
+    el.style.display="none";
+
+  }
+
+}
+
+
+// =========================
+// SPAWN MANAGEMENT
+// =========================
+
+function maintainWorld(){
+
+  while(foods.length<100)
+    spawnFood();
+
+  while(coins.length<35)
+    spawnCoin();
+
+
+  /*
+    Jumlah musuh meningkat berdasarkan level
+  */
+
+  let level=playerLevel();
+
+  let targetEnemies=
+    Math.min(
+      10,
+      4+
+      Math.floor(level/2)
+    );
+
+  while(enemies.length<targetEnemies){
+
+    enemies.push(
+      createEnemy(
+        enemies.length
+      )
+    );
+
+  }
+
+}
+
+
+// =========================
+// UI
+// =========================
 
 function updateUI(){
 
-document.getElementById("nameUI")
-.innerText=player.name;
+  document.getElementById(
+    "playerName"
+  ).textContent=player.name;
 
-document.getElementById("scoreUI")
-.innerText=Math.floor(player.score);
+  document.getElementById(
+    "scoreText"
+  ).textContent=
+    Math.floor(player.score);
 
-document.getElementById("lengthUI")
-.innerText=player.body.length;
+  document.getElementById(
+    "levelText"
+  ).textContent=
+    playerLevel();
 
-document.getElementById("levelUI")
-.innerText=level;
-
-updateLeaderboard();
-updatePowers();
-updateCoinUI();
-
-}
-
-
-function updateLeaderboard(){
-
-let list=[
-{
-name:player.name,
-score:player.score
-}
-];
-
-enemies.forEach(e=>{
-list.push({
-name:e.name,
-score:e.score
-});
-});
-
-list.sort(
-(a,b)=>b.score-a.score
-);
-
-let html="";
-
-list.slice(0,5).forEach(
-(p,i)=>{
-
-html+=`
-<div class="rankRow">
-<span>${i+1}. ${p.name}</span>
-<b>${Math.floor(p.score)}</b>
-</div>`;
-
-});
-
-document.getElementById(
-"leaderboard"
-).innerHTML=html;
+  document.getElementById(
+    "coinText"
+  ).textContent=
+    wallet;
 
 }
 
 
-/* =========================
-   MESSAGE
-========================= */
+// =========================
+// GAME LOOP
+// =========================
 
-function showMessage(text,time=1000){
+function loop(){
 
-let el=
-document.getElementById("message");
+  if(!running)
+    return;
 
-el.innerText=text;
-el.classList.add("show");
+  gameTime++;
 
-clearTimeout(messageTimer);
+  updatePlayer();
 
-messageTimer=
-setTimeout(()=>{
-el.classList.remove("show");
-},time);
+  for(let e of enemies)
+    updateEnemy(e);
+
+  suckItems();
+
+  eatFood();
+
+  checkCollisions();
+
+  updateParticles();
+
+  updatePowers();
+
+  maintainWorld();
+
+  updateUI();
+
+  drawWorld();
+
+  requestAnimationFrame(loop);
 
 }
 
 
-/* =========================
-   SHOP
-========================= */
+// =========================
+// START
+// =========================
+
+function startGame(){
+
+  document.getElementById(
+    "menu"
+  ).style.display="none";
+
+  document.getElementById(
+    "game"
+  ).style.display="block";
+
+  running=true;
+
+  gameTime=0;
+
+  magnetTime=0;
+  zoomTime=0;
+  bonusTime=0;
+  speedTime=0;
+
+  foods=[];
+  coins=[];
+  enemies=[];
+  particles=[];
+
+  createPlayer();
+
+  for(let i=0;i<6;i++)
+    enemies.push(createEnemy(i));
+
+  for(let i=0;i<120;i++)
+    spawnFood();
+
+  for(let i=0;i<40;i++)
+    spawnCoin();
+
+  updateUI();
+
+  loop();
+
+}
+
+
+// =========================
+// GAME OVER
+// =========================
+
+function gameOver(){
+
+  if(!running)
+    return;
+
+  running=false;
+
+  document.getElementById(
+    "finalText"
+  ).innerHTML=
+    `
+    <b>${player.name}</b><br>
+    Score: <b>${Math.floor(player.score)}</b><br>
+    Level: <b>${playerLevel()}</b>
+    `;
+
+
+  createLeaderboard();
+
+  document.getElementById(
+    "gameOver"
+  ).style.display="flex";
+
+}
+
+
+function createLeaderboard(){
+
+  let list=[
+    {
+      name:player.name,
+      score:Math.floor(player.score)
+    }
+  ];
+
+  for(let e of enemies){
+
+    list.push({
+      name:"🐍 HARD AI",
+      score:Math.floor(e.score)
+    });
+
+  }
+
+  list.sort(
+    (a,b)=>b.score-a.score
+  );
+
+  list=list.slice(0,5);
+
+  let html="<b>🏆 SCOREBOARD</b><br><br>";
+
+  list.forEach((x,i)=>{
+
+    html+=
+      `${i+1}. ${x.name} — ${x.score}<br>`;
+
+  });
+
+  document.getElementById(
+    "leaderboard"
+  ).innerHTML=html;
+
+}
+
+
+// =========================
+// RESTART
+// =========================
+
+function restartGame(){
+
+  document.getElementById(
+    "gameOver"
+  ).style.display="none";
+
+  startGame();
+
+}
+
+
+// =========================
+// BACK MENU
+// =========================
+
+function backMenu(){
+
+  running=false;
+
+  document.getElementById(
+    "gameOver"
+  ).style.display="none";
+
+  document.getElementById(
+    "game"
+  ).style.display="none";
+
+  document.getElementById(
+    "menu"
+  ).style.display="flex";
+
+}
+
+
+// =========================
+// SHOP
+// =========================
 
 function openShop(){
 
-if(!running)return;
+  document.getElementById(
+    "shopCoins"
+  ).textContent=wallet;
 
-running=false;
-
-updateCoinUI();
-
-document.getElementById("shop")
-.style.display="flex";
+  document.getElementById(
+    "shop"
+  ).style.display="flex";
 
 }
 
 
 function closeShop(){
 
-document.getElementById("shop")
-.style.display="none";
-
-running=true;
-
-lastTime=performance.now();
-
-requestAnimationFrame(gameLoop);
+  document.getElementById(
+    "shop"
+  ).style.display="none";
 
 }
 
 
-function buyItem(type,cost){
+function buyPower(type,cost){
 
-if(wallet<cost){
+  if(wallet<cost){
 
-showMessage(
-"❌ Koin tidak cukup!",
-1000
-);
+    alert("Koin kamu belum cukup!");
 
-return;
+    return;
 
-}
+  }
 
-wallet-=cost;
+  wallet-=cost;
 
-saveCoins();
-
-if(type==="magnet")
-magnetTime=60*20;
-
-if(type==="zoom")
-zoomTime=60*20;
-
-if(type==="bonus")
-bonusTime=60*20;
-
-if(type==="speed")
-speedTime=60*20;
-
-updateCoinUI();
-
-showMessage(
-"✅ ITEM AKTIF!",
-1000
-);
-
-}
+  localStorage.setItem(
+    "dragonCoins",
+    wallet
+  );
 
 
-/* =========================
-   GAME OVER
-========================= */
+  /*
+    20 detik
+  */
 
-function gameOver(reason){
+  let duration=
+    20*60;
 
-running=false;
+  if(type==="magnet")
+    magnetTime=duration;
 
-boost=false;
+  if(type==="zoom")
+    zoomTime=duration;
 
-document.getElementById(
-"overText"
-).innerText=reason;
+  if(type==="bonus")
+    bonusTime=duration;
 
-document.getElementById(
-"finalScore"
-).innerText=
-Math.floor(player.score);
+  if(type==="speed")
+    speedTime=duration;
 
-document.getElementById(
-"gameOver"
-).style.display="flex";
+
+  document.getElementById(
+    "shopCoins"
+  ).textContent=wallet;
+
+  updateUI();
 
 }
 
 
-/* =========================
-   RESTART
-========================= */
-
-function restartGame(){
-
-document.getElementById(
-"gameOver"
-).style.display="none";
-
-startGame();
-
-}
-
-
-/* =========================
-   MOUSE
-========================= */
-
-canvas.addEventListener(
-"mousemove",
-e=>{
-mouseX=e.clientX;
-mouseY=e.clientY;
-}
-);
-
-
-/* =========================
-   TOUCH
-========================= */
-
-canvas.addEventListener(
-"touchmove",
-e=>{
-
-if(e.touches.length){
-
-mouseX=e.touches[0].clientX;
-mouseY=e.touches[0].clientY;
-
-}
-
-},
-{passive:true}
-);
-
-
-/* =========================
-   JOYSTICK
-========================= */
+// =========================
+// JOYSTICK
+// =========================
 
 const joystick=
-document.getElementById("joystick");
+  document.getElementById("joystick");
 
 const stick=
-document.getElementById("stick");
+  document.getElementById("stick");
 
+let joyActive=false;
 
-function joystickMove(e){
+function updateJoystick(e){
 
-let r=
-joystick.getBoundingClientRect();
+  let rect=
+    joystick.getBoundingClientRect();
 
-let cx=r.left+r.width/2;
-let cy=r.top+r.height/2;
+  let cx=
+    rect.left+
+    rect.width/2;
 
-let x=e.clientX-cx;
-let y=e.clientY-cy;
+  let cy=
+    rect.top+
+    rect.height/2;
 
-let max=r.width/2-27;
+  let x=e.clientX-cx;
+  let y=e.clientY-cy;
 
-let len=Math.hypot(x,y);
+  let max=
+    rect.width/2-27;
 
-if(len>max){
+  let d=Math.hypot(x,y);
 
-x=x/len*max;
-y=y/len*max;
+  if(d>max){
 
-}
+    x=x/d*max;
+    y=y/d*max;
 
-stick.style.transform=
-`translate(${x}px,${y}px)`;
+  }
 
-if(Math.hypot(x,y)>10){
+  joystickX=x/max;
+  joystickY=y/max;
 
-player.angle=
-Math.atan2(y,x);
+  stick.style.left=
+    `calc(50% + ${x}px)`;
 
-joystickActive=true;
-
-}
+  stick.style.top=
+    `calc(50% + ${y}px)`;
 
 }
 
 
 joystick.addEventListener(
-"pointerdown",
-e=>{
-joystick.setPointerCapture(e.pointerId);
-joystickMove(e);
-}
+  "pointerdown",
+  e=>{
+
+    joyActive=true;
+
+    joystick.setPointerCapture(
+      e.pointerId
+    );
+
+    updateJoystick(e);
+
+  }
 );
+
 
 joystick.addEventListener(
-"pointermove",
-e=>{
-if(e.buttons)joystickMove(e);
-}
+  "pointermove",
+  e=>{
+
+    if(joyActive)
+      updateJoystick(e);
+
+  }
 );
+
 
 joystick.addEventListener(
-"pointerup",
-()=>{
-joystickActive=false;
-stick.style.transform="translate(0,0)";
-}
+  "pointerup",
+  resetJoystick
 );
 
 
-/* =========================
-   BOOST
-========================= */
+joystick.addEventListener(
+  "pointercancel",
+  resetJoystick
+);
+
+
+function resetJoystick(){
+
+  joyActive=false;
+
+  joystickX=0;
+  joystickY=0;
+
+  stick.style.left="50%";
+  stick.style.top="50%";
+
+}
+
+
+// =========================
+// BOOST BUTTON
+// =========================
 
 const boostBtn=
-document.getElementById("boostBtn");
+  document.getElementById("boostBtn");
 
 boostBtn.addEventListener(
-"pointerdown",
-e=>{
-e.preventDefault();
-boost=true;
-}
-);
+  "pointerdown",
+  e=>{
 
-boostBtn.addEventListener(
-"pointerup",
-()=>{
-boost=false;
-}
+    boost=true;
+
+    e.preventDefault();
+
+  }
 );
 
 boostBtn.addEventListener(
-"pointercancel",
-()=>{
-boost=false;
-}
+  "pointerup",
+  e=>{
+
+    boost=false;
+
+    e.preventDefault();
+
+  }
 );
 
 boostBtn.addEventListener(
-"pointerleave",
-()=>{
-boost=false;
-}
+  "pointercancel",
+  ()=>{
+    boost=false;
+  }
+);
+
+boostBtn.addEventListener(
+  "pointerleave",
+  ()=>{
+    boost=false;
+  }
 );
 
 
-/* =========================
-   KEYBOARD
-========================= */
+// =========================
+// MOUSE CONTROL PC
+// =========================
 
-document.addEventListener(
-"keydown",
-e=>{
+let mouseControl=false;
 
-if(!running)return;
+canvas.addEventListener(
+  "mousemove",
+  e=>{
 
-if(
-e.key==="ArrowUp"||
-e.key.toLowerCase()==="w"
-)
-player.angle=-Math.PI/2;
+    if(!running)
+      return;
 
-if(
-e.key==="ArrowDown"||
-e.key.toLowerCase()==="s"
-)
-player.angle=Math.PI/2;
+    /*
+      Mouse PC:
+      ular mengarah ke posisi mouse
+    */
 
-if(
-e.key==="ArrowLeft"||
-e.key.toLowerCase()==="a"
-)
-player.angle=Math.PI;
+    let dx=
+      e.clientX-W/2;
 
-if(
-e.key==="ArrowRight"||
-e.key.toLowerCase()==="d"
-)
-player.angle=0;
+    let dy=
+      e.clientY-H/2;
 
-if(e.code==="Space")
-boost=true;
+    if(
+      Math.abs(dx)>15 ||
+      Math.abs(dy)>15
+    ){
 
-}
-);
+      player.angle=
+        Math.atan2(dy,dx);
 
-document.addEventListener(
-"keyup",
-e=>{
-if(e.code==="Space")
-boost=false;
-}
+    }
+
+  }
 );
 
 
-/* =========================
-   GAME LOOP
-========================= */
+// =========================
+// INIT
+// =========================
 
-function gameLoop(time){
-
-if(!running)return;
-
-if(time-lastTime>=16){
-
-lastTime=time;
-
-updatePlayer();
-updateEnemies();
-
-suckItems();
-eatFood();
-
-headBattle();
-
-if(!running)return;
-
-bodyCollision();
-
-if(!running)return;
-
-updateLevel();
 updateUI();
-
-}
-
-drawWorld();
-
-requestAnimationFrame(gameLoop);
-
-}
-
-
-updateCoinUI();
 
 </script>
 
