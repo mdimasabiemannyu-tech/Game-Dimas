@@ -24,25 +24,26 @@ body{
 #menu{
   position:fixed;
   inset:0;
-  background:linear-gradient(135deg,#070707,#191919);
+  background:linear-gradient(135deg,#050505,#191919);
   display:flex;
   flex-direction:column;
   justify-content:center;
   align-items:center;
   z-index:20;
   padding:20px;
+  overflow-y:auto;
 }
 
 #menu h1{
   font-size:38px;
   color:#ffd400;
   text-shadow:0 0 20px #ff8c00;
-  margin-bottom:10px;
+  margin-bottom:8px;
 }
 
 #menu p{
   color:#aaa;
-  margin-bottom:25px;
+  margin-bottom:20px;
 }
 
 input{
@@ -52,7 +53,7 @@ input{
   border-radius:12px;
   text-align:center;
   font-size:18px;
-  margin-bottom:15px;
+  margin-bottom:12px;
   outline:none;
 }
 
@@ -71,6 +72,33 @@ button{
   box-shadow:0 0 20px #ff9d00;
 }
 
+.characterPreview{
+  width:280px;
+  background:rgba(255,255,255,.07);
+  border:1px solid #333;
+  border-radius:16px;
+  padding:14px;
+  margin-bottom:14px;
+  text-align:center;
+}
+
+#previewSnake{
+  font-size:42px;
+  margin-bottom:5px;
+}
+
+#selectedCharacter{
+  color:#ffd400;
+  font-weight:bold;
+}
+
+#characterBtn{
+  background:#333;
+  color:#fff;
+  margin-bottom:10px;
+  width:280px;
+}
+
 #game{
   display:none;
   position:fixed;
@@ -81,7 +109,7 @@ canvas{
   display:block;
   width:100%;
   height:100%;
-  background:#101010;
+  background:#101810;
 }
 
 #topUI{
@@ -97,7 +125,7 @@ canvas{
 }
 
 .panel{
-  background:rgba(0,0,0,.68);
+  background:rgba(0,0,0,.70);
   backdrop-filter:blur(6px);
   border:1px solid rgba(255,255,255,.12);
   padding:9px 12px;
@@ -128,6 +156,19 @@ canvas{
   padding:6px 9px;
   border-radius:8px;
   display:none;
+}
+
+#miniMap{
+  position:fixed;
+  right:10px;
+  top:76px;
+  width:170px;
+  height:170px;
+  z-index:5;
+  border:2px solid rgba(255,255,255,.25);
+  border-radius:12px;
+  background:#101010;
+  pointer-events:none;
 }
 
 #joystick{
@@ -170,19 +211,22 @@ canvas{
 }
 
 #shop,
-#gameOver{
+#gameOver,
+#characterShop{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.82);
+  background:rgba(0,0,0,.84);
   z-index:30;
   display:none;
   justify-content:center;
   align-items:center;
-  padding:20px;
+  padding:15px;
 }
 
 .modal{
-  width:min(420px,95vw);
+  width:min(450px,95vw);
+  max-height:90vh;
+  overflow-y:auto;
   background:#151515;
   border:1px solid #333;
   border-radius:20px;
@@ -213,6 +257,48 @@ canvas{
   padding:8px 12px;
 }
 
+.skinGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.skinCard{
+  background:#222;
+  border:1px solid #333;
+  border-radius:14px;
+  padding:12px;
+  text-align:center;
+}
+
+.skinEmoji{
+  font-size:36px;
+  margin-bottom:4px;
+}
+
+.skinName{
+  font-weight:bold;
+  margin-bottom:4px;
+}
+
+.skinPrice{
+  color:#ffd400;
+  font-size:13px;
+  margin-bottom:8px;
+}
+
+.skinCard button{
+  padding:8px 10px;
+  width:100%;
+  background:#ffd000;
+  color:#111;
+}
+
+.skinCard.selected{
+  border:2px solid #00e5ff;
+  box-shadow:0 0 15px rgba(0,229,255,.3);
+}
+
 .closeBtn{
   margin-top:15px;
   background:#444;
@@ -226,7 +312,22 @@ canvas{
   color:#ccc;
 }
 
+#zoneInfo{
+  position:fixed;
+  bottom:10px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:5;
+  background:rgba(0,0,0,.55);
+  padding:6px 12px;
+  border-radius:10px;
+  font-size:11px;
+  color:#ddd;
+  pointer-events:none;
+}
+
 @media(max-width:600px){
+
   #menu h1{
     font-size:30px;
   }
@@ -234,6 +335,12 @@ canvas{
   .panel{
     font-size:12px;
     padding:7px 9px;
+  }
+
+  #miniMap{
+    width:125px;
+    height:125px;
+    top:76px;
   }
 
   #joystick{
@@ -247,6 +354,10 @@ canvas{
     right:20px;
     bottom:35px;
   }
+
+  .skinGrid{
+    grid-template-columns:1fr 1fr;
+  }
 }
 </style>
 </head>
@@ -254,14 +365,43 @@ canvas{
 <body>
 
 <div id="menu">
+
   <h1>🐉 DRAGON SNAKE</h1>
+
   <p>Battle • Survive • Become the Biggest</p>
 
-  <input id="nameInput" maxlength="15" placeholder="Nama pemain">
+  <input
+    id="nameInput"
+    maxlength="15"
+    placeholder="Nama pemain"
+  >
 
-  <button class="startBtn" onclick="startGame()">
+  <div class="characterPreview">
+
+    <div id="previewSnake">🐍</div>
+
+    Karakter kamu:<br>
+
+    <span id="selectedCharacter">
+      Classic Snake
+    </span>
+
+  </div>
+
+  <button
+    id="characterBtn"
+    onclick="openCharacterShop()"
+  >
+    🐍 PILIH KARAKTER
+  </button>
+
+  <button
+    class="startBtn"
+    onclick="startGame()"
+  >
     MULAI GAME
   </button>
+
 </div>
 
 
@@ -269,17 +409,41 @@ canvas{
 
 <canvas id="canvas"></canvas>
 
+<canvas
+  id="miniMap"
+  width="180"
+  height="180"
+></canvas>
+
+
 <div id="topUI">
 
   <div class="panel">
+
     🐉 <b id="playerName">Player</b><br>
-    Score: <b id="scoreText">0</b><br>
-    Level: <b id="levelText">1</b><br>
-    🪙 <b id="coinText">0</b><br>
-    🐍 Musuh: <b id="enemyText">0</b>
+
+    🐍 Karakter:
+    <b id="skinText">Classic</b><br>
+
+    Score:
+    <b id="scoreText">0</b><br>
+
+    Level:
+    <b id="levelText">1</b><br>
+
+    🪙
+    <b id="coinText">0</b><br>
+
+    🐍 Musuh:
+    <b id="enemyText">0</b>
+
   </div>
 
-  <button id="shopBtn" onclick="openShop()">
+
+  <button
+    id="shopBtn"
+    onclick="openShop()"
+  >
     🛒 SHOP
   </button>
 
@@ -307,6 +471,11 @@ canvas{
 </div>
 
 
+<div id="zoneInfo">
+  🗺️ Jelajahi map • Hindari jurang!
+</div>
+
+
 <div id="joystick">
   <div id="stick"></div>
 </div>
@@ -319,11 +488,13 @@ canvas{
 </div>
 
 
+<!-- POWER SHOP -->
+
 <div id="shop">
 
   <div class="modal">
 
-    <h2>🛒 SHOP</h2>
+    <h2>🛒 POWER SHOP</h2>
 
     <div style="margin-bottom:12px">
       🪙 Koin:
@@ -332,6 +503,7 @@ canvas{
 
 
     <div class="shopItem">
+
       <span>
         🧲 Magnet<br>
         <small>Tarik item dari jauh</small>
@@ -340,10 +512,12 @@ canvas{
       <button onclick="buyPower('magnet',50)">
         50 🪙
       </button>
+
     </div>
 
 
     <div class="shopItem">
+
       <span>
         🔭 Zoom<br>
         <small>Penglihatan lebih luas</small>
@@ -352,10 +526,12 @@ canvas{
       <button onclick="buyPower('zoom',80)">
         80 🪙
       </button>
+
     </div>
 
 
     <div class="shopItem">
+
       <span>
         💰 Bonus 5×<br>
         <small>Nilai makanan & koin</small>
@@ -364,10 +540,12 @@ canvas{
       <button onclick="buyPower('bonus',100)">
         100 🪙
       </button>
+
     </div>
 
 
     <div class="shopItem">
+
       <span>
         ⚡ Speed 2×<br>
         <small>Kecepatan meningkat</small>
@@ -376,10 +554,14 @@ canvas{
       <button onclick="buyPower('speed',100)">
         100 🪙
       </button>
+
     </div>
 
 
-    <button class="closeBtn" onclick="closeShop()">
+    <button
+      class="closeBtn"
+      onclick="closeShop()"
+    >
       TUTUP
     </button>
 
@@ -387,6 +569,40 @@ canvas{
 
 </div>
 
+
+<!-- CHARACTER SHOP -->
+
+<div id="characterShop">
+
+  <div class="modal">
+
+    <h2>🐍 CHARACTER SHOP</h2>
+
+    <div style="margin-bottom:12px">
+      🪙 Koin:
+      <b id="characterCoins">0</b>
+    </div>
+
+
+    <div
+      class="skinGrid"
+      id="skinGrid"
+    ></div>
+
+
+    <button
+      class="closeBtn"
+      onclick="closeCharacterShop()"
+    >
+      TUTUP
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- GAME OVER -->
 
 <div id="gameOver">
 
@@ -400,11 +616,17 @@ canvas{
 
     <br>
 
-    <button class="startBtn" onclick="restartGame()">
+    <button
+      class="startBtn"
+      onclick="restartGame()"
+    >
       MAIN LAGI
     </button>
 
-    <button class="closeBtn" onclick="backMenu()">
+    <button
+      class="closeBtn"
+      onclick="backMenu()"
+    >
       MENU
     </button>
 
@@ -415,42 +637,312 @@ canvas{
 
 <script>
 
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d");
+const canvas =
+  document.getElementById("canvas");
+
+const ctx =
+  canvas.getContext("2d");
+
+
+const miniMap =
+  document.getElementById("miniMap");
+
+const miniCtx =
+  miniMap.getContext("2d");
+
 
 let W,H;
 
+
 function resize(){
 
-  W=canvas.width=window.innerWidth;
-  H=canvas.height=window.innerHeight;
+  W=canvas.width=
+    window.innerWidth;
+
+  H=canvas.height=
+    window.innerHeight;
 
 }
 
-window.addEventListener("resize",resize);
+window.addEventListener(
+  "resize",
+  resize
+);
 
 resize();
 
 
+/* =================================================
+   WORLD
+================================================= */
+
 const WORLD=5000;
 
+const CLIFF=180;
+
+const WARNING=140;
+
+
+/* =================================================
+   MAP ZONES
+================================================= */
+
+const MAP_ZONES=[
+
+  {
+    x:1150,
+    y:1150,
+    r:620,
+    type:"ramai"
+  },
+
+  {
+    x:3750,
+    y:1250,
+    r:680,
+    type:"ramai"
+  },
+
+  {
+    x:3700,
+    y:3700,
+    r:680,
+    type:"ramai"
+  },
+
+  {
+    x:2500,
+    y:2500,
+    r:1050,
+    type:"sedang"
+  },
+
+  {
+    x:1050,
+    y:3950,
+    r:720,
+    type:"sepi"
+  },
+
+  {
+    x:4050,
+    y:4050,
+    r:650,
+    type:"sepi"
+  }
+
+];
+
+
+/* =================================================
+   CHARACTER / SKIN
+================================================= */
+
+const CHARACTER_SKINS=[
+
+  {
+    id:"classic",
+    name:"Classic Snake",
+    emoji:"🐍",
+    price:0,
+    colors:["#00e5ff","#008cff"],
+    pattern:"classic"
+  },
+
+  {
+    id:"fire",
+    name:"Fire Snake",
+    emoji:"🔥",
+    price:150,
+    colors:["#ff3b00","#ffb000"],
+    pattern:"fire"
+  },
+
+  {
+    id:"ice",
+    name:"Ice Snake",
+    emoji:"❄️",
+    price:200,
+    colors:["#8df5ff","#1976ff"],
+    pattern:"ice"
+  },
+
+  {
+    id:"toxic",
+    name:"Toxic Snake",
+    emoji:"☠️",
+    price:250,
+    colors:["#b6ff00","#39b300"],
+    pattern:"toxic"
+  },
+
+  {
+    id:"neon",
+    name:"Neon Snake",
+    emoji:"🌈",
+    price:300,
+    colors:["#ff00e6","#00ffff"],
+    pattern:"neon"
+  },
+
+  {
+    id:"cobra",
+    name:"Cobra",
+    emoji:"🐍",
+    price:400,
+    colors:["#d59b28","#522900"],
+    pattern:"cobra"
+  },
+
+  {
+    id:"dragon",
+    name:"Dragon Snake",
+    emoji:"🐉",
+    price:600,
+    colors:["#ff2020","#790000"],
+    pattern:"dragon"
+  },
+
+  {
+    id:"gold",
+    name:"Golden Dragon",
+    emoji:"👑",
+    price:1000,
+    colors:["#fff000","#ff9800"],
+    pattern:"gold"
+  }
+
+];
+
+
+let selectedSkin =
+  localStorage.getItem(
+    "dragonSelectedSkin"
+  ) || "classic";
+
+
+let ownedSkins =
+  JSON.parse(
+    localStorage.getItem(
+      "dragonOwnedSkins"
+    ) || '["classic"]'
+  );
+
+
+function getSkin(){
+
+  return CHARACTER_SKINS.find(
+    s=>s.id===selectedSkin
+  ) || CHARACTER_SKINS[0];
+
+}
+
+
+/* =================================================
+   ENEMY INDONESIAN NAMES
+================================================= */
+
+const ENEMY_NAMES=[
+
+  "Budi",
+  "Andi",
+  "Rizky",
+  "Dimas",
+  "Fajar",
+  "Reza",
+  "Arif",
+  "Aldi",
+  "Bagas",
+  "Ilham",
+  "Yoga",
+  "Rian",
+  "Bayu",
+  "Hendra",
+  "Wahyu",
+  "Agus",
+  "Rizal",
+  "Fikri",
+  "Doni",
+  "Raka",
+  "Fauzan",
+  "Galih",
+  "Tegar",
+  "Iqbal",
+  "Rendy",
+  "Daffa",
+  "Farhan",
+  "Hafiz",
+  "Joko",
+  "Yogi"
+
+];
+
+
+let availableEnemyNames=[];
+
+
+function resetEnemyNames(){
+
+  availableEnemyNames=
+    [...ENEMY_NAMES]
+    .sort(
+      ()=>Math.random()-.5
+    );
+
+}
+
+
+function getEnemyName(){
+
+  if(
+    availableEnemyNames.length===0
+  ){
+
+    resetEnemyNames();
+
+  }
+
+  return availableEnemyNames.pop();
+
+}
+
+
+/* =================================================
+   GAME VARIABLES
+================================================= */
+
 let player;
+
 let enemies=[];
+
 let foods=[];
+
 let coins=[];
+
 let particles=[];
 
+let decorations=[];
+
 let running=false;
+
 let gameTime=0;
 
-let wallet=parseInt(
-  localStorage.getItem("dragonCoins") || "0"
-);
+let deathReason="";
+
+
+let wallet=
+  parseInt(
+    localStorage.getItem(
+      "dragonCoins"
+    ) || "0"
+  );
+
 
 let magnetTime=0;
 let zoomTime=0;
 let bonusTime=0;
 let speedTime=0;
+
 
 let joystickX=0;
 let joystickY=0;
@@ -460,113 +952,268 @@ let boost=false;
 const keys={};
 
 
-/* ================================
+/* =================================================
    KEYBOARD
-================================ */
+================================================= */
 
-document.addEventListener("keydown",e=>{
+document.addEventListener(
+  "keydown",
+  e=>{
 
-  keys[e.key.toLowerCase()]=true;
-
-  if(e.code==="Space"){
-
-    boost=true;
-
-    e.preventDefault();
-
-  }
-
-});
+    keys[
+      e.key.toLowerCase()
+    ]=true;
 
 
-document.addEventListener("keyup",e=>{
+    if(e.code==="Space"){
 
-  keys[e.key.toLowerCase()]=false;
+      boost=true;
 
-  if(e.code==="Space"){
+      e.preventDefault();
 
-    boost=false;
+    }
 
   }
+);
 
-});
+
+document.addEventListener(
+  "keyup",
+  e=>{
+
+    keys[
+      e.key.toLowerCase()
+    ]=false;
 
 
-/* ================================
-   PLAYER LEVEL
-================================ */
+    if(e.code==="Space"){
+
+      boost=false;
+
+    }
+
+  }
+);
+
+
+/* =================================================
+   LEVEL
+================================================= */
 
 function playerLevel(){
 
   return Math.min(
     10,
-    Math.floor(player.score/100)+1
+    Math.floor(
+      player.score/100
+    )+1
   );
 
 }
 
 
-/* ================================
+/* =================================================
+   SAFE MAP
+================================================= */
+
+function isSafe(x,y){
+
+  return(
+    x>CLIFF &&
+    x<WORLD-CLIFF &&
+    y>CLIFF &&
+    y<WORLD-CLIFF
+  );
+
+}
+
+
+function isNearCliff(
+  x,
+  y,
+  margin=WARNING
+){
+
+  return(
+    x<CLIFF+margin ||
+    x>WORLD-CLIFF-margin ||
+    y<CLIFF+margin ||
+    y>WORLD-CLIFF-margin
+  );
+
+}
+
+
+/* =================================================
+   ZONE
+================================================= */
+
+function getZone(x,y){
+
+  for(
+    let z of MAP_ZONES
+  ){
+
+    if(
+      z.type==="ramai" &&
+      dist(
+        x,y,
+        z.x,z.y
+      )<z.r
+    ){
+
+      return "ramai";
+
+    }
+
+  }
+
+
+  for(
+    let z of MAP_ZONES
+  ){
+
+    if(
+      z.type==="sepi" &&
+      dist(
+        x,y,
+        z.x,z.y
+      )<z.r
+    ){
+
+      return "sepi";
+
+    }
+
+  }
+
+
+  return "sedang";
+
+}
+
+
+/* =================================================
+   RANDOM SAFE POINT
+================================================= */
+
+function randomSafePoint(
+  wantedZone=null
+){
+
+  for(let attempt=0;attempt<150;attempt++){
+
+    let x=
+      CLIFF+40+
+      Math.random()*
+      (WORLD-CLIFF*2-80);
+
+    let y=
+      CLIFF+40+
+      Math.random()*
+      (WORLD-CLIFF*2-80);
+
+
+    if(
+      wantedZone &&
+      getZone(x,y)!==wantedZone
+    ){
+
+      continue;
+
+    }
+
+
+    return{x,y};
+
+  }
+
+
+  return{
+    x:WORLD/2,
+    y:WORLD/2
+  };
+
+}
+
+
+/* =================================================
+   WEIGHTED ZONE
+================================================= */
+
+function randomZone(){
+
+  let r=Math.random();
+
+  if(r<.55)
+    return "ramai";
+
+  if(r<.85)
+    return "sedang";
+
+  return "sepi";
+
+}
+
+
+/* =================================================
    PLAYER SPEED
-================================ */
-
-/*
-   Setiap 1.000 poin ular sedikit lebih lambat.
-
-   0-999      = 100%
-   1000-1999  = 95%
-   2000-2999  = 90%
-   3000-3999  = 85%
-   dst.
-
-   Minimum 55%, supaya tidak terlalu lambat.
-*/
+================================================= */
 
 function getPlayerSpeed(){
 
   let base=2.7;
 
   let thousandSteps=
-    Math.floor(player.score/1000);
+    Math.floor(
+      player.score/1000
+    );
+
 
   let multiplier=
-    1-(thousandSteps*0.05);
+    1-
+    thousandSteps*.05;
+
 
   multiplier=
-    Math.max(0.55,multiplier);
+    Math.max(
+      .55,
+      multiplier
+    );
+
 
   let result=
     base*multiplier;
 
-  if(speedTime>0){
 
+  if(speedTime>0)
     result*=2;
 
-  }
 
-  if(boost){
-
+  if(boost)
     result*=1.65;
 
-  }
 
   return result;
 
 }
 
 
-/* ================================
+/* =================================================
    CREATE PLAYER
-================================ */
+================================================= */
 
 function createPlayer(){
 
   let x=WORLD/2;
+
   let y=WORLD/2;
+
 
   player={
 
     x:x,
+
     y:y,
 
     angle:0,
@@ -582,18 +1229,29 @@ function createPlayer(){
     color:"#00d9ff",
 
     name:
-      document.getElementById("nameInput")
+      document
+      .getElementById(
+        "nameInput"
+      )
       .value
-      .trim() || "Player"
+      .trim() ||
+      "Player",
+
+    skin:getSkin()
 
   };
 
 
-  for(let i=0;i<35;i++){
+  for(
+    let i=0;
+    i<35;
+    i++
+  ){
 
     player.body.push({
 
       x:x-i*8,
+
       y:y
 
     });
@@ -603,48 +1261,52 @@ function createPlayer(){
 }
 
 
-/* ================================
+/* =================================================
    CREATE ENEMY
-================================ */
+================================================= */
 
 function createEnemy(i){
 
-  let angle=
-    Math.random()*Math.PI*2;
+  let point;
 
-  let distance=
-    700+
-    Math.random()*1400;
-
-  let x=
-    player.x+
-    Math.cos(angle)*distance;
-
-  let y=
-    player.y+
-    Math.sin(angle)*distance;
+  let zone=
+    randomZone();
 
 
-  x=
-    Math.max(
-      200,
-      Math.min(WORLD-200,x)
-    );
+  for(
+    let attempt=0;
+    attempt<100;
+    attempt++
+  ){
 
-  y=
-    Math.max(
-      200,
-      Math.min(WORLD-200,y)
-    );
+    point=
+      randomSafePoint(zone);
 
 
-  let level=playerLevel();
+    if(
+      dist(
+        point.x,
+        point.y,
+        player.x,
+        player.y
+      )>650
+    ){
+
+      break;
+
+    }
+
+  }
 
 
-  /*
-     Musuh dibuat lebih besar supaya
-     tidak mudah mati.
-  */
+  let x=point.x;
+
+  let y=point.y;
+
+
+  let level=
+    playerLevel();
+
 
   let enemyScore=
     220+
@@ -652,13 +1314,36 @@ function createEnemy(i){
     Math.random()*250;
 
 
+  const enemySkins=[
+
+    CHARACTER_SKINS[1],
+    CHARACTER_SKINS[2],
+    CHARACTER_SKINS[3],
+    CHARACTER_SKINS[4],
+    CHARACTER_SKINS[5],
+    CHARACTER_SKINS[6]
+
+  ];
+
+
+  let enemySkin=
+    enemySkins[
+      Math.floor(
+        Math.random()*
+        enemySkins.length
+      )
+    ];
+
+
   let enemy={
 
     x:x,
+
     y:y,
 
     angle:
-      Math.random()*Math.PI*2,
+      Math.random()*
+      Math.PI*2,
 
     radius:
       17+
@@ -668,20 +1353,14 @@ function createEnemy(i){
 
     body:[],
 
-    color:[
-      "#ff3030",
-      "#ff7b00",
-      "#b400ff",
-      "#00ff66",
-      "#ff1493",
-      "#ff3333",
-      "#00d9ff"
-    ][i%7],
+    color:enemySkin.colors[0],
 
+    skin:enemySkin,
 
-    /* AI */
+    name:getEnemyName(),
 
     targetX:x,
+
     targetY:y,
 
     thinkTimer:0,
@@ -697,15 +1376,13 @@ function createEnemy(i){
 
     flankSide:
       Math.random()<.5
-      ? -1
-      : 1,
+      ?-1
+      :1,
 
     personality:
       Math.random(),
 
     mode:"hunt",
-
-    surroundTarget:null,
 
     avoidTimer:0
 
@@ -714,7 +1391,10 @@ function createEnemy(i){
 
   let length=
     32+
-    Math.floor(enemyScore/13);
+    Math.floor(
+      enemyScore/13
+    );
+
 
   length=
     Math.min(
@@ -723,11 +1403,16 @@ function createEnemy(i){
     );
 
 
-  for(let j=0;j<length;j++){
+  for(
+    let j=0;
+    j<length;
+    j++
+  ){
 
     enemy.body.push({
 
       x:x-j*8,
+
       y:y
 
     });
@@ -740,25 +1425,31 @@ function createEnemy(i){
 }
 
 
-/* ================================
+/* =================================================
    FOOD
-================================ */
+================================================= */
 
 function spawnFood(){
 
+  let zone=
+    randomZone();
+
+
+  let p=
+    randomSafePoint(zone);
+
+
   foods.push({
 
-    x:
-      100+
-      Math.random()*(WORLD-200),
+    x:p.x,
 
-    y:
-      100+
-      Math.random()*(WORLD-200),
+    y:p.y,
 
     value:
       5+
-      Math.floor(Math.random()*10),
+      Math.floor(
+        Math.random()*10
+      ),
 
     size:
       7+
@@ -769,25 +1460,31 @@ function spawnFood(){
 }
 
 
-/* ================================
+/* =================================================
    COIN
-================================ */
+================================================= */
 
 function spawnCoin(){
 
+  let zone=
+    randomZone();
+
+
+  let p=
+    randomSafePoint(zone);
+
+
   coins.push({
 
-    x:
-      100+
-      Math.random()*(WORLD-200),
+    x:p.x,
 
-    y:
-      100+
-      Math.random()*(WORLD-200),
+    y:p.y,
 
     value:
       1+
-      Math.floor(Math.random()*3),
+      Math.floor(
+        Math.random()*3
+      ),
 
     size:7
 
@@ -796,11 +1493,13 @@ function spawnCoin(){
 }
 
 
-/* ================================
+/* =================================================
    DISTANCE
-================================ */
+================================================= */
 
-function dist(ax,ay,bx,by){
+function dist(
+  ax,ay,bx,by
+){
 
   return Math.hypot(
     ax-bx,
@@ -810,9 +1509,9 @@ function dist(ax,ay,bx,by){
 }
 
 
-/* ================================
-   ANGLE DIFFERENCE
-================================ */
+/* =================================================
+   ANGLE
+================================================= */
 
 function angleDiff(a,b){
 
@@ -824,14 +1523,12 @@ function angleDiff(a,b){
 }
 
 
-/* ================================
+/* =================================================
    PLAYER BODY COLLISION
-================================ */
+================================================= */
 
 function hitPlayerBody(
-  x,
-  y,
-  r=0
+  x,y,r=0
 ){
 
   for(
@@ -840,14 +1537,14 @@ function hitPlayerBody(
     i++
   ){
 
-    let p=player.body[i];
+    let p=
+      player.body[i];
+
 
     if(
       dist(
-        x,
-        y,
-        p.x,
-        p.y
+        x,y,
+        p.x,p.y
       )
       <
       player.radius+
@@ -866,15 +1563,13 @@ function hitPlayerBody(
 }
 
 
-/* ================================
+/* =================================================
    ENEMY BODY COLLISION
-================================ */
+================================================= */
 
 function hitEnemyBody(
   enemy,
-  x,
-  y,
-  r=0
+  x,y,r=0
 ){
 
   for(
@@ -883,14 +1578,14 @@ function hitEnemyBody(
     i++
   ){
 
-    let p=enemy.body[i];
+    let p=
+      enemy.body[i];
+
 
     if(
       dist(
-        x,
-        y,
-        p.x,
-        p.y
+        x,y,
+        p.x,p.y
       )
       <
       enemy.radius+
@@ -909,27 +1604,22 @@ function hitEnemyBody(
 }
 
 
-/* ================================
-   ENEMY VS ENEMY BODY
-================================ */
+/* =================================================
+   ENEMY VS ENEMY
+================================================= */
 
 function hitOtherEnemyBody(
   attacker,
-  x,
-  y
+  x,y
 ){
 
-  for(let other of enemies){
+  for(
+    let other of enemies
+  ){
 
     if(other===attacker)
       continue;
 
-
-    /*
-       Mulai dari bagian 7,
-       supaya kepala musuh tidak dianggap
-       sebagai badan.
-    */
 
     for(
       let j=7;
@@ -937,14 +1627,14 @@ function hitOtherEnemyBody(
       j++
     ){
 
-      let p=other.body[j];
+      let p=
+        other.body[j];
+
 
       if(
         dist(
-          x,
-          y,
-          p.x,
-          p.y
+          x,y,
+          p.x,p.y
         )
         <
         attacker.radius+
@@ -965,38 +1655,22 @@ function hitOtherEnemyBody(
 }
 
 
-/* ================================
-   CHECK FUTURE PLAYER BODY
-================================ */
-
-function futurePlayerDanger(
-  x,
-  y,
-  r
-){
-
-  return hitPlayerBody(
-    x,
-    y,
-    r
-  );
-
-}
-
-
-/* ================================
-   SMART ENEMY AI
-================================ */
+/* =================================================
+   SMART AI
+================================================= */
 
 function updateEnemy(enemy){
 
-  let level=playerLevel();
+  let level=
+    playerLevel();
 
 
   enemy.thinkTimer--;
 
 
-  if(enemy.thinkTimer<=0){
+  if(
+    enemy.thinkTimer<=0
+  ){
 
     enemy.thinkTimer=
       Math.max(
@@ -1013,20 +1687,21 @@ function updateEnemy(enemy){
       player.y-
       enemy.y;
 
+
     let distanceToPlayer=
       Math.hypot(dx,dy);
 
 
-    /* =====================================
-       1. CEK BAHAYA BADAN PLAYER
-    ===================================== */
+    /* CLIFF CHECK */
 
     let futureDistance=130;
+
 
     let futureX=
       enemy.x+
       Math.cos(enemy.angle)*
       futureDistance;
+
 
     let futureY=
       enemy.y+
@@ -1035,88 +1710,49 @@ function updateEnemy(enemy){
 
 
     let danger=
-      futurePlayerDanger(
+      hitPlayerBody(
         futureX,
         futureY,
         enemy.radius
       );
 
 
-    /* =====================================
-       2. CEK BADAN SENDIRI
-    ===================================== */
-
-    let selfDanger=false;
-
-
-    for(
-      let j=10;
-      j<enemy.body.length;
-      j+=3
-    ){
-
-      let p=enemy.body[j];
-
-      if(
-        dist(
-          futureX,
-          futureY,
-          p.x,
-          p.y
-        )
-        <
-        enemy.radius*2.7
-      ){
-
-        selfDanger=true;
-
-        break;
-
-      }
-
-    }
+    let cliffDanger=
+      !isSafe(
+        futureX,
+        futureY
+      ) ||
+      isNearCliff(
+        futureX,
+        futureY,
+        70
+      );
 
 
-    /* =====================================
-       3. CEK MUSUH LAIN
-    ===================================== */
+    if(cliffDanger){
 
-    let nearbyEnemy=null;
-    let nearbyDistance=Infinity;
-
-
-    for(let other of enemies){
-
-      if(other===enemy)
-        continue;
-
-      let d=
-        dist(
-          enemy.x,
-          enemy.y,
-          other.x,
-          other.y
+      let centerAngle=
+        Math.atan2(
+          WORLD/2-enemy.y,
+          WORLD/2-enemy.x
         );
 
-      if(
-        d<500 &&
-        d<nearbyDistance
-      ){
 
-        nearbyDistance=d;
-        nearbyEnemy=other;
+      enemy.targetX=
+        enemy.x+
+        Math.cos(centerAngle)*
+        500;
 
-      }
+
+      enemy.targetY=
+        enemy.y+
+        Math.sin(centerAngle)*
+        500;
+
+      enemy.avoidTimer=50;
 
     }
-
-
-    /* =====================================
-       4. MUSUH YANG LEBIH LEMAH
-       MENGHINDARI KEPALA PLAYER
-    ===================================== */
-
-    if(
+    else if(
       enemy.score<
       player.score
     ){
@@ -1146,36 +1782,7 @@ function updateEnemy(enemy){
         Math.sin(sideAngle)*
         sideDistance;
 
-
-      /*
-        Jangan masuk terlalu dekat
-        dengan kepala pemain.
-      */
-
-      if(
-        distanceToPlayer<250
-      ){
-
-        enemy.targetX=
-          player.x+
-          Math.cos(sideAngle)*
-          220;
-
-        enemy.targetY=
-          player.y+
-          Math.sin(sideAngle)*
-          220;
-
-      }
-
     }
-
-
-    /* =====================================
-       5. MUSUH KUAT
-       BERUSAHA MEMOTONG JALAN
-    ===================================== */
-
     else{
 
       enemy.mode="attack";
@@ -1186,33 +1793,17 @@ function updateEnemy(enemy){
         level*15;
 
 
-      /*
-        Target sedikit di depan pemain.
-      */
-
-      let predictedX=
+      enemy.targetX=
         player.x+
         Math.cos(player.angle)*
         prediction;
 
-      let predictedY=
+
+      enemy.targetY=
         player.y+
         Math.sin(player.angle)*
         prediction;
 
-
-      enemy.targetX=
-        predictedX;
-
-      enemy.targetY=
-        predictedY;
-
-
-      /*
-        Jika terlalu dekat,
-        geser ke samping supaya
-        tidak mati head-to-head.
-      */
 
       if(
         distanceToPlayer<250
@@ -1240,28 +1831,16 @@ function updateEnemy(enemy){
     }
 
 
-    /* =====================================
-       6. MODE MENGURUNG PLAYER
-    ===================================== */
-
-    /*
-       Sebagian besar musuh yang dekat
-       dengan pemain akan mengambil posisi
-       berbeda mengelilingi pemain.
-    */
+    /* SURROUND */
 
     if(
-      distanceToPlayer<
-      950
+      distanceToPlayer<950 &&
+      !cliffDanger
     ){
-
-      /*
-        Gunakan index musuh untuk menentukan
-        posisi pengepungan.
-      */
 
       let myIndex=
         enemies.indexOf(enemy);
+
 
       if(myIndex<0)
         myIndex=0;
@@ -1274,103 +1853,59 @@ function updateEnemy(enemy){
         );
 
 
-      /*
-        Posisi lingkaran di sekitar player.
-      */
-
       let surroundAngle=
         (myIndex/total)*
         Math.PI*2+
         gameTime*.001;
 
 
-      /*
-        Musuh tidak berdiri tepat di kepala.
-        Mereka mengambil posisi sekitar player.
-      */
-
       let surroundDistance=
         360+
         (myIndex%3)*90;
 
 
-      /*
-        Jika player besar,
-        lingkaran pengepungan sedikit lebih jauh.
-      */
-
       surroundDistance+=
-        Math.floor(player.score/1000)*
-        25;
+        Math.floor(
+          player.score/1000
+        )*25;
 
 
-      let surroundX=
+      let sx=
         player.x+
-        Math.cos(surroundAngle)*
-        surroundDistance;
-
-
-      let surroundY=
-        player.y+
-        Math.sin(surroundAngle)*
-        surroundDistance;
-
-
-      /*
-        Kalau jalur menuju titik pengepungan
-        aman, gunakan target tersebut.
-      */
-
-      let testX=
-        enemy.x+
         Math.cos(
-          Math.atan2(
-            surroundY-enemy.y,
-            surroundX-enemy.x
-          )
+          surroundAngle
         )*
-        100;
+        surroundDistance;
 
 
-      let testY=
-        enemy.y+
+      let sy=
+        player.y+
         Math.sin(
-          Math.atan2(
-            surroundY-enemy.y,
-            surroundX-enemy.x
-          )
+          surroundAngle
         )*
-        100;
+        surroundDistance;
 
 
       if(
+        isSafe(sx,sy) &&
         !hitPlayerBody(
-          testX,
-          testY,
+          sx,
+          sy,
           enemy.radius
         )
       ){
 
-        enemy.targetX=surroundX;
-        enemy.targetY=surroundY;
+        enemy.targetX=sx;
+        enemy.targetY=sy;
 
       }
 
     }
 
 
-    /* =====================================
-       7. BAHAYA BADAN PLAYER
-    ===================================== */
+    /* PLAYER BODY DANGER */
 
     if(danger){
-
-      /*
-        Jangan tabrak badan player.
-
-        Musuh akan menggeser ke samping,
-        kemudian mencari jalur lain.
-      */
 
       enemy.avoidTimer=40;
 
@@ -1402,9 +1937,39 @@ function updateEnemy(enemy){
     }
 
 
-    /* =====================================
-       8. BADAN SENDIRI
-    ===================================== */
+    /* OWN BODY */
+
+    let selfDanger=false;
+
+
+    for(
+      let j=10;
+      j<enemy.body.length;
+      j+=3
+    ){
+
+      let p=
+        enemy.body[j];
+
+
+      if(
+        dist(
+          futureX,
+          futureY,
+          p.x,p.y
+        )
+        <
+        enemy.radius*2.7
+      ){
+
+        selfDanger=true;
+
+        break;
+
+      }
+
+    }
+
 
     if(selfDanger){
 
@@ -1428,9 +1993,42 @@ function updateEnemy(enemy){
     }
 
 
-    /* =====================================
-       9. HINDARI MUSUH LAIN
-    ===================================== */
+    /* OTHER ENEMY */
+
+    let nearbyEnemy=null;
+
+    let nearbyDistance=Infinity;
+
+
+    for(
+      let other of enemies
+    ){
+
+      if(other===enemy)
+        continue;
+
+
+      let d=
+        dist(
+          enemy.x,
+          enemy.y,
+          other.x,
+          other.y
+        );
+
+
+      if(
+        d<500 &&
+        d<nearbyDistance
+      ){
+
+        nearbyDistance=d;
+        nearbyEnemy=other;
+
+      }
+
+    }
+
 
     if(
       nearbyEnemy &&
@@ -1458,20 +2056,20 @@ function updateEnemy(enemy){
     }
 
 
-    /* =====================================
-       10. MAKANAN
-    ===================================== */
+    /* FOOD */
 
     if(
-      distanceToPlayer>
-      1100
+      distanceToPlayer>1100
     ){
 
       let nearestFood=null;
+
       let foodDistance=Infinity;
 
 
-      for(let f of foods){
+      for(
+        let f of foods
+      ){
 
         let d=
           dist(
@@ -1507,10 +2105,6 @@ function updateEnemy(enemy){
   }
 
 
-  /* =====================================
-     MOVEMENT
-  ===================================== */
-
   let targetAngle=
     Math.atan2(
       enemy.targetY-enemy.y,
@@ -1536,7 +2130,7 @@ function updateEnemy(enemy){
 
     enemy.avoidTimer--;
 
-    turn*=1.4;
+    turn*=1.5;
 
   }
 
@@ -1553,24 +2147,17 @@ function updateEnemy(enemy){
   }
   else{
 
-    enemy.angle=targetAngle;
+    enemy.angle=
+      targetAngle;
 
   }
 
-
-  /* =====================================
-     HARD SPEED
-  ===================================== */
 
   let speed=
     2.35+
     level*.18+
     enemy.aggression*.25;
 
-
-  /*
-     Musuh yang kuat lebih agresif.
-  */
 
   if(
     enemy.score>=player.score
@@ -1581,17 +2168,42 @@ function updateEnemy(enemy){
   }
 
 
-  /*
-     Musuh yang sedang mengurung
-     sedikit diperlambat agar formasinya
-     lebih stabil.
-  */
-
   if(
     enemy.mode==="flank"
   ){
 
     speed*=.96;
+
+  }
+
+
+  /* NEVER INTENTIONALLY AIM INTO CLIFF */
+
+  let testX=
+    enemy.x+
+    Math.cos(enemy.angle)*
+    120;
+
+
+  let testY=
+    enemy.y+
+    Math.sin(enemy.angle)*
+    120;
+
+
+  if(
+    !isSafe(testX,testY)
+  ){
+
+    let centerAngle=
+      Math.atan2(
+        WORLD/2-enemy.y,
+        WORLD/2-enemy.x
+      );
+
+
+    enemy.angle=
+      centerAngle;
 
   }
 
@@ -1606,42 +2218,26 @@ function updateEnemy(enemy){
     speed;
 
 
-  /* =====================================
-     WORLD BORDER
-  ===================================== */
+  /* ENEMY FALLS INTO ABYSS */
 
-  if(enemy.x<100){
+  if(
+    !isSafe(
+      enemy.x,
+      enemy.y
+    )
+  ){
 
-    enemy.x=100;
-    enemy.angle=0;
+    killEnemy(
+      enemy,
+      true
+    );
 
-  }
-
-  if(enemy.x>WORLD-100){
-
-    enemy.x=WORLD-100;
-    enemy.angle=Math.PI;
-
-  }
-
-  if(enemy.y<100){
-
-    enemy.y=100;
-    enemy.angle=Math.PI/2;
-
-  }
-
-  if(enemy.y>WORLD-100){
-
-    enemy.y=WORLD-100;
-    enemy.angle=-Math.PI/2;
+    return;
 
   }
 
 
-  /* =====================================
-     UPDATE BODY
-  ===================================== */
+  /* BODY */
 
   enemy.body[0].x=
     enemy.x;
@@ -1689,13 +2285,14 @@ function updateEnemy(enemy){
 }
 
 
-/* ================================
-   PLAYER UPDATE
-================================ */
+/* =================================================
+   PLAYER
+================================================= */
 
 function updatePlayer(){
 
   let dx=0;
+
   let dy=0;
 
 
@@ -1746,11 +2343,15 @@ function updatePlayer(){
     let d=
       Math.hypot(dx,dy);
 
+
     dx/=d;
     dy/=d;
 
+
     player.angle=
-      Math.atan2(dy,dx);
+      Math.atan2(
+        dy,dx
+      );
 
   }
 
@@ -1769,26 +2370,20 @@ function updatePlayer(){
     speed;
 
 
-  /* BORDER */
+  /* JURANG */
 
-  player.x=
-    Math.max(
-      100,
-      Math.min(
-        WORLD-100,
-        player.x
-      )
-    );
+  if(
+    !isSafe(
+      player.x,
+      player.y
+    )
+  ){
 
+    cliffDeath();
 
-  player.y=
-    Math.max(
-      100,
-      Math.min(
-        WORLD-100,
-        player.y
-      )
-    );
+    return;
+
+  }
 
 
   /* BODY */
@@ -1839,14 +2434,39 @@ function updatePlayer(){
 }
 
 
-/* ================================
+/* =================================================
+   CLIFF DEATH
+================================================= */
+
+function cliffDeath(){
+
+  createExplosion(
+    player.x,
+    player.y,
+    "#4b0082"
+  );
+
+
+  deathReason=
+    "💀 Kamu jatuh ke jurang!";
+
+
+  gameOver(
+    deathReason
+  );
+
+}
+
+
+/* =================================================
    SUCTION
-================================ */
+================================================= */
 
 function suctionRange(){
 
   if(magnetTime>0)
     return 280;
+
 
   return player.radius*1.5;
 
@@ -1859,7 +2479,9 @@ function suckItems(){
     suctionRange();
 
 
-  for(let f of foods){
+  for(
+    let f of foods
+  ){
 
     let d=
       dist(
@@ -1892,7 +2514,9 @@ function suckItems(){
   }
 
 
-  for(let c of coins){
+  for(
+    let c of coins
+  ){
 
     let d=
       dist(
@@ -1921,9 +2545,9 @@ function suckItems(){
 }
 
 
-/* ================================
-   EAT FOOD
-================================ */
+/* =================================================
+   EAT
+================================================= */
 
 function eatFood(){
 
@@ -1962,11 +2586,17 @@ function eatFood(){
       let add=
         Math.max(
           1,
-          Math.floor(value/5)
+          Math.floor(
+            value/5
+          )
         );
 
 
-      for(let j=0;j<add;j++){
+      for(
+        let j=0;
+        j<add;
+        j++
+      ){
 
         let last=
           player.body[
@@ -1977,6 +2607,7 @@ function eatFood(){
         player.body.push({
 
           x:last.x,
+
           y:last.y
 
         });
@@ -2038,11 +2669,14 @@ function eatFood(){
 }
 
 
-/* ================================
-   ENEMY DEATH
-================================ */
+/* =================================================
+   KILL ENEMY
+================================================= */
 
-function killEnemy(enemy){
+function killEnemy(
+  enemy,
+  cliff=false
+){
 
   let index=
     enemies.indexOf(enemy);
@@ -2055,19 +2689,19 @@ function killEnemy(enemy){
   createExplosion(
     enemy.x,
     enemy.y,
-    enemy.color
+    cliff
+      ? "#4b0082"
+      : enemy.color
   );
 
-
-  /*
-     Pecah menjadi makanan.
-  */
 
   let foodCount=
     Math.min(
       20,
       8+
-      Math.floor(enemy.score/120)
+      Math.floor(
+        enemy.score/120
+      )
     );
 
 
@@ -2077,23 +2711,35 @@ function killEnemy(enemy){
     k++
   ){
 
-    foods.push({
+    let fx=
+      enemy.x+
+      (Math.random()-.5)*150;
 
-      x:
-        enemy.x+
-        (Math.random()-.5)*150,
 
-      y:
-        enemy.y+
-        (Math.random()-.5)*150,
+    let fy=
+      enemy.y+
+      (Math.random()-.5)*150;
 
-      value:
-        8+
-        Math.floor(Math.random()*15),
 
-      size:8
+    if(isSafe(fx,fy)){
 
-    });
+      foods.push({
+
+        x:fx,
+
+        y:fy,
+
+        value:
+          8+
+          Math.floor(
+            Math.random()*15
+          ),
+
+        size:8
+
+      });
+
+    }
 
   }
 
@@ -2106,19 +2752,13 @@ function killEnemy(enemy){
 }
 
 
-/* ================================
-   COLLISION SYSTEM
-================================ */
+/* =================================================
+   COLLISIONS
+================================================= */
 
 function checkCollisions(){
 
-
-  /* =================================================
-     1. MUSUH VS PLAYER BODY
-
-     KEPALA MUSUH menabrak BADAN PLAYER
-     = MUSUH MATI
-  ================================================= */
+  /* ENEMY HEAD VS PLAYER BODY */
 
   for(
     let i=enemies.length-1;
@@ -2149,22 +2789,16 @@ function checkCollisions(){
 
       killEnemy(e);
 
-
-      continue;
-
     }
 
   }
 
 
-  /* =================================================
-     2. PLAYER HEAD VS ENEMY BODY
+  /* PLAYER HEAD VS ENEMY BODY */
 
-     KEPALA PLAYER menabrak BADAN MUSUH
-     = PLAYER MATI
-  ================================================= */
-
-  for(let e of enemies){
+  for(
+    let e of enemies
+  ){
 
     if(
       hitEnemyBody(
@@ -2175,7 +2809,9 @@ function checkCollisions(){
       )
     ){
 
-      gameOver();
+      gameOver(
+        "💥 Tubuhmu menabrak badan "+e.name+"!"
+      );
 
       return;
 
@@ -2184,14 +2820,7 @@ function checkCollisions(){
   }
 
 
-  /* =================================================
-     3. MUSUH VS MUSUH
-
-     KEPALA MUSUH A menabrak BADAN MUSUH B
-     = MUSUH B MATI
-
-     Kepala yang menabrak tetap hidup.
-  ================================================= */
+  /* ENEMY HEAD VS ENEMY BODY */
 
   for(
     let i=enemies.length-1;
@@ -2222,11 +2851,6 @@ function checkCollisions(){
       victim!==attacker
     ){
 
-      /*
-        Musuh dengan badan lebih panjang
-        tetap bisa mati.
-      */
-
       killEnemy(victim);
 
     }
@@ -2234,11 +2858,7 @@ function checkCollisions(){
   }
 
 
-  /* =================================================
-     4. HEAD VS HEAD
-
-     Score lebih besar menang.
-  ================================================= */
+  /* PLAYER HEAD VS ENEMY HEAD */
 
   for(
     let i=enemies.length-1;
@@ -2287,7 +2907,9 @@ function checkCollisions(){
       }
       else{
 
-        gameOver();
+        gameOver(
+          "⚔️ Kalah duel melawan "+e.name+"!"
+        );
 
         return;
 
@@ -2298,11 +2920,7 @@ function checkCollisions(){
   }
 
 
-  /* =================================================
-     5. MUSUH HEAD VS MUSUH HEAD
-
-     Musuh yang score lebih besar menang.
-  ================================================= */
+  /* ENEMY VS ENEMY HEAD */
 
   for(
     let i=enemies.length-1;
@@ -2332,10 +2950,8 @@ function checkCollisions(){
 
       let d=
         dist(
-          a.x,
-          a.y,
-          b.x,
-          b.y
+          a.x,a.y,
+          b.x,b.y
         );
 
 
@@ -2383,21 +2999,24 @@ function checkCollisions(){
 }
 
 
-/* ================================
+/* =================================================
    EXPLOSION
-================================ */
+================================================= */
 
 function createExplosion(
-  x,
-  y,
-  color
+  x,y,color
 ){
 
-  for(let i=0;i<20;i++){
+  for(
+    let i=0;
+    i<20;
+    i++
+  ){
 
     particles.push({
 
       x:x,
+
       y:y,
 
       vx:
@@ -2419,9 +3038,9 @@ function createExplosion(
 }
 
 
-/* ================================
+/* =================================================
    PARTICLES
-================================ */
+================================================= */
 
 function updateParticles(){
 
@@ -2435,28 +3054,41 @@ function updateParticles(){
 
 
     p.x+=p.vx;
-    p.y+=p.vy;
 
+    p.y+=p.vy;
 
     p.life--;
 
 
-    if(p.life<=0)
-      particles.splice(i,1);
+    if(
+      p.life<=0
+    ){
+
+      particles.splice(
+        i,
+        1
+      );
+
+    }
 
   }
 
 }
 
 
-/* ================================
+/* =================================================
    DRAW SNAKE
-================================ */
+================================================= */
 
 function drawSnake(
   snake,
   isPlayer=false
 ){
+
+  let skin=
+    snake.skin ||
+    CHARACTER_SKINS[0];
+
 
   for(
     let i=snake.body.length-1;
@@ -2482,25 +3114,132 @@ function drawSnake(
     ctx.arc(
       p.x,
       p.y,
-      Math.max(8,r),
+      Math.max(
+        8,
+        r
+      ),
       0,
       Math.PI*2
     );
 
 
+    let colorIndex=
+      i%2;
+
+
     ctx.fillStyle=
-      isPlayer
-      ?
-      (
-        i%2===0
-        ? "#00e5ff"
-        : "#008cff"
-      )
-      :
-      snake.color;
+      skin.colors[
+        colorIndex
+      ];
 
 
     ctx.fill();
+
+
+    /* PATTERN */
+
+    if(
+      skin.pattern==="fire"
+    ){
+
+      ctx.strokeStyle=
+        "#fff200";
+
+      ctx.lineWidth=2;
+
+      ctx.stroke();
+
+    }
+
+
+    if(
+      skin.pattern==="ice"
+    ){
+
+      ctx.strokeStyle=
+        "#ffffff";
+
+      ctx.lineWidth=1.5;
+
+      ctx.stroke();
+
+    }
+
+
+    if(
+      skin.pattern==="toxic"
+    ){
+
+      if(i%3===0){
+
+        ctx.fillStyle=
+          "#eaff00";
+
+        ctx.fill();
+
+      }
+
+    }
+
+
+    if(
+      skin.pattern==="neon"
+    ){
+
+      ctx.strokeStyle=
+        i%2
+        ? "#00ffff"
+        : "#ff00e6";
+
+      ctx.lineWidth=2;
+
+      ctx.stroke();
+
+    }
+
+
+    if(
+      skin.pattern==="cobra"
+    ){
+
+      if(i%4===0){
+
+        ctx.fillStyle=
+          "#e5b84b";
+
+        ctx.fill();
+
+      }
+
+    }
+
+
+    if(
+      skin.pattern==="dragon"
+    ){
+
+      ctx.strokeStyle=
+        "#ffcf00";
+
+      ctx.lineWidth=1.5;
+
+      ctx.stroke();
+
+    }
+
+
+    if(
+      skin.pattern==="gold"
+    ){
+
+      ctx.strokeStyle=
+        "#fff8a0";
+
+      ctx.lineWidth=2;
+
+      ctx.stroke();
+
+    }
 
   }
 
@@ -2520,24 +3259,114 @@ function drawSnake(
 
 
   ctx.fillStyle=
-    isPlayer
-    ? "#00ffff"
-    : snake.color;
+    skin.colors[0];
 
 
   ctx.fill();
 
 
+  /* SPECIAL HEAD */
+
+  if(
+    skin.pattern==="cobra"
+  ){
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+      snake.x,
+      snake.y,
+      snake.radius+7,
+      snake.radius+2,
+      snake.angle,
+      0,
+      Math.PI*2
+    );
+
+    ctx.strokeStyle="#f1c04b";
+
+    ctx.lineWidth=2;
+
+    ctx.stroke();
+
+  }
+
+
+  if(
+    skin.pattern==="dragon"
+  ){
+
+    ctx.fillStyle="#ffcc00";
+
+    for(
+      let s of [-1,1]
+    ){
+
+      ctx.beginPath();
+
+      ctx.moveTo(
+        snake.x+
+        Math.cos(
+          snake.angle
+        )*12,
+
+        snake.y+
+        Math.sin(
+          snake.angle
+        )*12
+      );
+
+      ctx.lineTo(
+        snake.x+
+        Math.cos(
+          snake.angle
+          +s*.6
+        )*25,
+
+        snake.y+
+        Math.sin(
+          snake.angle
+          +s*.6
+        )*25
+      );
+
+      ctx.lineTo(
+        snake.x+
+        Math.cos(
+          snake.angle
+          +s*.25
+        )*12,
+
+        snake.y+
+        Math.sin(
+          snake.angle
+          +s*.25
+        )*12
+      );
+
+      ctx.fill();
+
+    }
+
+  }
+
+
   /* EYES */
 
   let ex=
-    Math.cos(snake.angle);
+    Math.cos(
+      snake.angle
+    );
+
 
   let ey=
-    Math.sin(snake.angle);
+    Math.sin(
+      snake.angle
+    );
 
 
   let px=-ey;
+
   let py=ex;
 
 
@@ -2597,9 +3426,514 @@ function drawSnake(
 }
 
 
-/* ================================
+/* =================================================
+   MAP DECORATION
+================================================= */
+
+function createMapDecorations(){
+
+  decorations=[];
+
+
+  for(
+    let i=0;
+    i<260;
+    i++
+  ){
+
+    let zone=
+      randomZone();
+
+
+    let p=
+      randomSafePoint(zone);
+
+
+    let type=
+      Math.random();
+
+
+    decorations.push({
+
+      x:p.x,
+
+      y:p.y,
+
+      type:type,
+
+      size:
+        5+
+        Math.random()*12,
+
+      zone:zone
+
+    });
+
+  }
+
+}
+
+
+/* =================================================
+   DRAW DECORATIONS
+================================================= */
+
+function drawDecorations(){
+
+  for(
+    let d of decorations
+  ){
+
+    if(
+      dist(
+        player.x,
+        player.y,
+        d.x,d.y
+      )>1800
+    )
+      continue;
+
+
+    if(
+      d.type<.45
+    ){
+
+      ctx.fillStyle=
+        d.zone==="ramai"
+        ? "#287a32"
+        : "#1f5c28";
+
+
+      ctx.beginPath();
+
+      ctx.arc(
+        d.x,
+        d.y,
+        d.size,
+        0,
+        Math.PI*2
+      );
+
+      ctx.fill();
+
+
+      ctx.fillStyle="#66aa44";
+
+      ctx.beginPath();
+
+      ctx.arc(
+        d.x-3,
+        d.y-3,
+        d.size*.35,
+        0,
+        Math.PI*2
+      );
+
+      ctx.fill();
+
+    }
+    else if(
+      d.type<.75
+    ){
+
+      ctx.fillStyle=
+        "#777";
+
+
+      ctx.beginPath();
+
+      ctx.arc(
+        d.x,
+        d.y,
+        d.size*.45,
+        0,
+        Math.PI*2
+      );
+
+      ctx.fill();
+
+    }
+    else{
+
+      ctx.strokeStyle=
+        "#4b8a38";
+
+      ctx.lineWidth=2;
+
+      ctx.beginPath();
+
+      ctx.moveTo(
+        d.x,
+        d.y+d.size
+      );
+
+      ctx.lineTo(
+        d.x-3,
+        d.y-d.size
+      );
+
+      ctx.moveTo(
+        d.x+3,
+        d.y+d.size
+      );
+
+      ctx.lineTo(
+        d.x+5,
+        d.y-d.size*.5
+      );
+
+      ctx.stroke();
+
+    }
+
+  }
+
+}
+
+
+/* =================================================
+   DRAW ZONES
+================================================= */
+
+function drawZones(){
+
+  /* RAMAI */
+
+  for(
+    let z of MAP_ZONES
+  ){
+
+    if(z.type==="ramai"){
+
+      ctx.beginPath();
+
+      ctx.arc(
+        z.x,
+        z.y,
+        z.r,
+        0,
+        Math.PI*2
+      );
+
+      ctx.fillStyle=
+        "rgba(30,130,50,.12)";
+
+      ctx.fill();
+
+
+      ctx.strokeStyle=
+        "rgba(100,255,120,.12)";
+
+      ctx.lineWidth=3;
+
+      ctx.stroke();
+
+
+      ctx.fillStyle=
+        "rgba(170,255,170,.55)";
+
+      ctx.font=
+        "bold 22px Arial";
+
+      ctx.textAlign="center";
+
+      ctx.fillText(
+        "🔥 ZONA RAMAI",
+        z.x,
+        z.y
+      );
+
+    }
+
+  }
+
+
+  /* SEPI */
+
+  for(
+    let z of MAP_ZONES
+  ){
+
+    if(z.type==="sepi"){
+
+      ctx.beginPath();
+
+      ctx.arc(
+        z.x,
+        z.y,
+        z.r,
+        0,
+        Math.PI*2
+      );
+
+      ctx.fillStyle=
+        "rgba(30,30,30,.22)";
+
+      ctx.fill();
+
+
+      ctx.strokeStyle=
+        "rgba(150,150,150,.10)";
+
+      ctx.lineWidth=3;
+
+      ctx.stroke();
+
+
+      ctx.fillStyle=
+        "rgba(180,180,180,.45)";
+
+      ctx.font=
+        "bold 22px Arial";
+
+      ctx.textAlign="center";
+
+      ctx.fillText(
+        "🌾 ZONA SEPI",
+        z.x,
+        z.y
+      );
+
+    }
+
+  }
+
+
+  /* CENTRAL MEDIUM */
+
+  ctx.beginPath();
+
+  ctx.arc(
+    2500,
+    2500,
+    1050,
+    0,
+    Math.PI*2
+  );
+
+  ctx.strokeStyle=
+    "rgba(130,180,130,.08)";
+
+  ctx.lineWidth=3;
+
+  ctx.stroke();
+
+
+  ctx.fillStyle=
+    "rgba(180,220,180,.40)";
+
+  ctx.font=
+    "bold 22px Arial";
+
+  ctx.textAlign="center";
+
+  ctx.fillText(
+    "🌿 ZONA SEDANG",
+    2500,
+    2500
+  );
+
+}
+
+
+/* =================================================
+   DRAW CLIFF
+================================================= */
+
+function drawCliff(){
+
+  /* OUTER ABYSS */
+
+  ctx.fillStyle="#09050d";
+
+
+  ctx.fillRect(
+    0,
+    0,
+    WORLD,
+    WORLD
+  );
+
+
+  /* SAFE AREA */
+
+  ctx.fillStyle="#102015";
+
+
+  ctx.fillRect(
+    CLIFF,
+    CLIFF,
+    WORLD-CLIFF*2,
+    WORLD-CLIFF*2
+  );
+
+
+  /* CLIFF WARNING STRIP */
+
+  ctx.strokeStyle=
+    "rgba(255,60,0,.55)";
+
+  ctx.lineWidth=22;
+
+  ctx.strokeRect(
+    CLIFF+8,
+    CLIFF+8,
+    WORLD-CLIFF*2-16,
+    WORLD-CLIFF*2-16
+  );
+
+
+  /* INNER EDGE */
+
+  ctx.strokeStyle=
+    "rgba(255,170,0,.45)";
+
+  ctx.lineWidth=4;
+
+  ctx.strokeRect(
+    CLIFF,
+    CLIFF,
+    WORLD-CLIFF*2,
+    WORLD-CLIFF*2
+  );
+
+
+  /* ABYSS ROCKS */
+
+  ctx.fillStyle="#2a1738";
+
+
+  for(
+    let x=20;
+    x<WORLD;
+    x+=95
+  ){
+
+    ctx.beginPath();
+
+    ctx.arc(
+      x,
+      CLIFF/2,
+      14,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+      x,
+      WORLD-CLIFF/2,
+      14,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+  }
+
+
+  for(
+    let y=20;
+    y<WORLD;
+    y+=95
+  ){
+
+    ctx.beginPath();
+
+    ctx.arc(
+      CLIFF/2,
+      y,
+      14,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+      WORLD-CLIFF/2,
+      y,
+      14,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+  }
+
+
+  /* WARNING TEXT */
+
+  ctx.fillStyle=
+    "rgba(255,100,50,.75)";
+
+  ctx.font=
+    "bold 24px Arial";
+
+  ctx.textAlign="center";
+
+  ctx.fillText(
+    "⚠ JURANG",
+    WORLD/2,
+    95
+  );
+
+  ctx.fillText(
+    "⚠ JURANG",
+    WORLD/2,
+    WORLD-65
+  );
+
+  ctx.save();
+
+  ctx.translate(
+    95,
+    WORLD/2
+  );
+
+  ctx.rotate(-Math.PI/2);
+
+  ctx.fillText(
+    "⚠ JURANG",
+    0,
+    0
+  );
+
+  ctx.restore();
+
+
+  ctx.save();
+
+  ctx.translate(
+    WORLD-65,
+    WORLD/2
+  );
+
+  ctx.rotate(Math.PI/2);
+
+  ctx.fillText(
+    "⚠ JURANG",
+    0,
+    0
+  );
+
+  ctx.restore();
+
+}
+
+
+/* =================================================
    DRAW WORLD
-================================ */
+================================================= */
 
 function drawWorld(){
 
@@ -2638,31 +3972,26 @@ function drawWorld(){
   );
 
 
-  /* BACKGROUND */
-
-  ctx.fillStyle="#101010";
+  drawCliff();
 
 
-  ctx.fillRect(
-    0,
-    0,
-    WORLD,
-    WORLD
-  );
+  drawZones();
+
+
+  drawDecorations();
 
 
   /* GRID */
 
   ctx.strokeStyle=
-    "rgba(255,255,255,.035)";
-
+    "rgba(255,255,255,.025)";
 
   ctx.lineWidth=1;
 
 
   for(
-    let x=0;
-    x<=WORLD;
+    let x=CLIFF;
+    x<=WORLD-CLIFF;
     x+=100
   ){
 
@@ -2670,12 +3999,12 @@ function drawWorld(){
 
     ctx.moveTo(
       x,
-      0
+      CLIFF
     );
 
     ctx.lineTo(
       x,
-      WORLD
+      WORLD-CLIFF
     );
 
     ctx.stroke();
@@ -2684,20 +4013,20 @@ function drawWorld(){
 
 
   for(
-    let y=0;
-    y<=WORLD;
+    let y=CLIFF;
+    y<=WORLD-CLIFF;
     y+=100
   ){
 
     ctx.beginPath();
 
     ctx.moveTo(
-      0,
+      CLIFF,
       y
     );
 
     ctx.lineTo(
-      WORLD,
+      WORLD-CLIFF,
       y
     );
 
@@ -2708,7 +4037,9 @@ function drawWorld(){
 
   /* FOOD */
 
-  for(let f of foods){
+  for(
+    let f of foods
+  ){
 
     ctx.font=
       `${f.size*2.2}px Arial`;
@@ -2729,10 +4060,11 @@ function drawWorld(){
 
   /* COINS */
 
-  for(let c of coins){
+  for(
+    let c of coins
+  ){
 
     ctx.beginPath();
-
 
     ctx.arc(
       c.x,
@@ -2741,7 +4073,6 @@ function drawWorld(){
       0,
       Math.PI*2
     );
-
 
     ctx.fillStyle="#ffd700";
 
@@ -2755,13 +4086,11 @@ function drawWorld(){
 
     ctx.fillStyle="#8b6500";
 
-
     ctx.font="8px Arial";
 
     ctx.textAlign="center";
 
     ctx.textBaseline="middle";
-
 
     ctx.fillText(
       "★",
@@ -2774,7 +4103,9 @@ function drawWorld(){
 
   /* ENEMIES */
 
-  for(let e of enemies){
+  for(
+    let e of enemies
+  ){
 
     drawSnake(
       e,
@@ -2783,28 +4114,32 @@ function drawWorld(){
 
 
     ctx.font=
-      "bold 10px Arial";
+      "bold 11px Arial";
 
     ctx.textAlign="center";
+
 
     ctx.fillStyle="#fff";
 
 
-    let modeText=
-      e.mode==="flank"
-      ? "FLANK"
-      : "HARD";
+    ctx.fillText(
+      "🐍 "+e.name,
+      e.x,
+      e.y-e.radius-20
+    );
+
+
+    ctx.font="9px Arial";
+
+    ctx.fillStyle="#ddd";
 
 
     ctx.fillText(
-      "🐍 "+
-      modeText+
-      " "+
-      Math.floor(e.score),
+      Math.floor(e.score)+
+      " • "+
+      e.mode.toUpperCase(),
       e.x,
-      e.y-
-      e.radius-
-      10
+      e.y-e.radius-8
     );
 
   }
@@ -2818,9 +4153,30 @@ function drawWorld(){
   );
 
 
+  /* PLAYER NAME */
+
+  ctx.font=
+    "bold 12px Arial";
+
+  ctx.textAlign="center";
+
+  ctx.fillStyle="#fff";
+
+
+  ctx.fillText(
+    player.name,
+    player.x,
+    player.y-
+    player.radius-
+    13
+  );
+
+
   /* PARTICLES */
 
-  for(let p of particles){
+  for(
+    let p of particles
+  ){
 
     ctx.globalAlpha=
       Math.max(
@@ -2830,7 +4186,6 @@ function drawWorld(){
 
 
     ctx.beginPath();
-
 
     ctx.arc(
       p.x,
@@ -2855,12 +4210,183 @@ function drawWorld(){
 
   ctx.restore();
 
+
+  drawMiniMap();
+
 }
 
 
-/* ================================
+/* =================================================
+   MINI MAP
+================================================= */
+
+function drawMiniMap(){
+
+  let mw=
+    miniMap.width;
+
+  let mh=
+    miniMap.height;
+
+
+  miniCtx.clearRect(
+    0,
+    0,
+    mw,
+    mh
+  );
+
+
+  miniCtx.fillStyle="#0b120d";
+
+  miniCtx.fillRect(
+    0,
+    0,
+    mw,
+    mh
+  );
+
+
+  let s=
+    mw/WORLD;
+
+
+  /* CLIFF */
+
+  miniCtx.fillStyle="#24132e";
+
+  miniCtx.fillRect(
+    0,
+    0,
+    mw,
+    mh
+  );
+
+
+  miniCtx.fillStyle="#17351d";
+
+  miniCtx.fillRect(
+    CLIFF*s,
+    CLIFF*s,
+    (WORLD-CLIFF*2)*s,
+    (WORLD-CLIFF*2)*s
+  );
+
+
+  /* ZONES */
+
+  for(
+    let z of MAP_ZONES
+  ){
+
+    miniCtx.beginPath();
+
+    miniCtx.arc(
+      z.x*s,
+      z.y*s,
+      z.r*s,
+      0,
+      Math.PI*2
+    );
+
+
+    if(z.type==="ramai")
+      miniCtx.fillStyle=
+        "rgba(50,180,70,.35)";
+
+    else if(z.type==="sepi")
+      miniCtx.fillStyle=
+        "rgba(50,50,50,.45)";
+
+    else
+      miniCtx.fillStyle=
+        "rgba(100,160,100,.20)";
+
+
+    miniCtx.fill();
+
+  }
+
+
+  /* FOOD */
+
+  miniCtx.fillStyle="#ffd166";
+
+
+  for(
+    let f of foods
+  ){
+
+    miniCtx.fillRect(
+      f.x*s-1,
+      f.y*s-1,
+      2,
+      2
+    );
+
+  }
+
+
+  /* ENEMIES */
+
+  for(
+    let e of enemies
+  ){
+
+    miniCtx.beginPath();
+
+    miniCtx.arc(
+      e.x*s,
+      e.y*s,
+      3,
+      0,
+      Math.PI*2
+    );
+
+    miniCtx.fillStyle=
+      e.color;
+
+    miniCtx.fill();
+
+  }
+
+
+  /* PLAYER */
+
+  miniCtx.beginPath();
+
+  miniCtx.arc(
+    player.x*s,
+    player.y*s,
+    4,
+    0,
+    Math.PI*2
+  );
+
+  miniCtx.fillStyle="#00ffff";
+
+  miniCtx.fill();
+
+
+  /* BORDER */
+
+  miniCtx.strokeStyle="#fff";
+
+  miniCtx.lineWidth=2;
+
+  miniCtx.strokeRect(
+    1,
+    1,
+    mw-2,
+    mh-2
+  );
+
+}
+
+
+/* =================================================
    POWERS
-================================ */
+================================================= */
 
 function updatePowers(){
 
@@ -2942,9 +4468,9 @@ function setPower(
 }
 
 
-/* ================================
+/* =================================================
    WORLD MAINTAIN
-================================ */
+================================================= */
 
 function maintainWorld(){
 
@@ -2969,10 +4495,6 @@ function maintainWorld(){
   let level=
     playerLevel();
 
-
-  /*
-     Musuh bertambah secara bertahap.
-  */
 
   let targetEnemies=
     Math.min(
@@ -3000,9 +4522,9 @@ function maintainWorld(){
 }
 
 
-/* ================================
+/* =================================================
    UI
-================================ */
+================================================= */
 
 function updateUI(){
 
@@ -3010,6 +4532,12 @@ function updateUI(){
     "playerName"
   ).textContent=
     player.name;
+
+
+  document.getElementById(
+    "skinText"
+  ).textContent=
+    player.skin.name;
 
 
   document.getElementById(
@@ -3037,12 +4565,34 @@ function updateUI(){
   ).textContent=
     enemies.length;
 
+
+  let zone=
+    getZone(
+      player.x,
+      player.y
+    );
+
+
+  let zoneText=
+    zone==="ramai"
+    ? "🔥 ZONA RAMAI"
+    : zone==="sepi"
+      ? "🌾 ZONA SEPI"
+      : "🌿 ZONA SEDANG";
+
+
+  document.getElementById(
+    "zoneInfo"
+  ).textContent=
+    zoneText+
+    " • ⚠ Jangan masuk jurang";
+
 }
 
 
-/* ================================
+/* =================================================
    GAME LOOP
-================================ */
+================================================= */
 
 function loop(){
 
@@ -3056,35 +4606,41 @@ function loop(){
   updatePlayer();
 
 
+  if(!running)
+    return;
+
+
   for(
-    let e of enemies
+    let e of [...enemies]
   ){
 
-    updateEnemy(e);
+    if(enemies.includes(e)){
+
+      updateEnemy(e);
+
+    }
 
   }
 
 
   suckItems();
 
-
   eatFood();
-
 
   checkCollisions();
 
 
-  updateParticles();
+  if(!running)
+    return;
 
+
+  updateParticles();
 
   updatePowers();
 
-
   maintainWorld();
 
-
   updateUI();
-
 
   drawWorld();
 
@@ -3096,9 +4652,9 @@ function loop(){
 }
 
 
-/* ================================
-   START GAME
-================================ */
+/* =================================================
+   START
+================================================= */
 
 function startGame(){
 
@@ -3117,25 +4673,49 @@ function startGame(){
   ).style.display="none";
 
 
+  document.getElementById(
+    "characterShop"
+  ).style.display="none";
+
+
+  document.getElementById(
+    "shop"
+  ).style.display="none";
+
+
   running=true;
 
   gameTime=0;
 
+  deathReason="";
+
 
   magnetTime=0;
+
   zoomTime=0;
+
   bonusTime=0;
+
   speedTime=0;
 
 
   foods=[];
+
   coins=[];
+
   enemies=[];
+
   particles=[];
 
 
+  resetEnemyNames();
+
+  createMapDecorations();
+
   createPlayer();
 
+
+  /* INITIAL ENEMIES */
 
   for(
     let i=0;
@@ -3150,6 +4730,8 @@ function startGame(){
   }
 
 
+  /* FOOD */
+
   for(
     let i=0;
     i<120;
@@ -3160,6 +4742,8 @@ function startGame(){
 
   }
 
+
+  /* COINS */
 
   for(
     let i=0;
@@ -3180,11 +4764,13 @@ function startGame(){
 }
 
 
-/* ================================
+/* =================================================
    GAME OVER
-================================ */
+================================================= */
 
-function gameOver(){
+function gameOver(
+  reason="Kamu kalah!"
+){
 
   if(!running)
     return;
@@ -3193,13 +4779,24 @@ function gameOver(){
   running=false;
 
 
+  deathReason=
+    reason;
+
+
   document.getElementById(
     "finalText"
   ).innerHTML=
     `
-    <b>${player.name}</b><br>
+    <b>${player.name}</b><br><br>
+
+    ${deathReason}<br><br>
+
+    Karakter:
+    <b>${player.skin.name}</b><br>
+
     Score:
     <b>${Math.floor(player.score)}</b><br>
+
     Level:
     <b>${playerLevel()}</b>
     `;
@@ -3215,30 +4812,36 @@ function gameOver(){
 }
 
 
-/* ================================
+/* =================================================
    LEADERBOARD
-================================ */
+================================================= */
 
 function createLeaderboard(){
 
   let list=[
 
     {
-      name:player.name,
+      name:
+        player.name,
+
       score:
         Math.floor(
           player.score
         )
+
     }
 
   ];
 
 
-  for(let e of enemies){
+  for(
+    let e of enemies
+  ){
 
     list.push({
 
-      name:"🐍 HARD AI",
+      name:
+        "🐍 "+e.name,
 
       score:
         Math.floor(
@@ -3285,9 +4888,9 @@ function createLeaderboard(){
 }
 
 
-/* ================================
+/* =================================================
    RESTART
-================================ */
+================================================= */
 
 function restartGame(){
 
@@ -3301,9 +4904,9 @@ function restartGame(){
 }
 
 
-/* ================================
+/* =================================================
    MENU
-================================ */
+================================================= */
 
 function backMenu(){
 
@@ -3324,12 +4927,15 @@ function backMenu(){
     "menu"
   ).style.display="flex";
 
+
+  updateCharacterPreview();
+
 }
 
 
-/* ================================
-   SHOP
-================================ */
+/* =================================================
+   POWER SHOP
+================================================= */
 
 function openShop(){
 
@@ -3411,9 +5017,237 @@ function buyPower(
 }
 
 
-/* ================================
+/* =================================================
+   CHARACTER SHOP
+================================================= */
+
+function openCharacterShop(){
+
+  renderCharacterShop();
+
+
+  document.getElementById(
+    "characterShop"
+  ).style.display="flex";
+
+}
+
+
+function closeCharacterShop(){
+
+  document.getElementById(
+    "characterShop"
+  ).style.display="none";
+
+}
+
+
+function renderCharacterShop(){
+
+  let grid=
+    document.getElementById(
+      "skinGrid"
+    );
+
+
+  grid.innerHTML="";
+
+
+  document.getElementById(
+    "characterCoins"
+  ).textContent=
+    wallet;
+
+
+  for(
+    let skin of CHARACTER_SKINS
+  ){
+
+    let owned=
+      ownedSkins.includes(
+        skin.id
+      );
+
+
+    let selected=
+      selectedSkin===
+      skin.id;
+
+
+    let card=
+      document.createElement(
+        "div"
+      );
+
+
+    card.className=
+      "skinCard"+
+      (
+        selected
+        ? " selected"
+        : ""
+      );
+
+
+    let buttonText;
+
+
+    if(selected){
+
+      buttonText=
+        "✓ DIPAKAI";
+
+    }
+    else if(owned){
+
+      buttonText=
+        "PAKAI";
+
+    }
+    else{
+
+      buttonText=
+        "BELI";
+
+    }
+
+
+    card.innerHTML=
+      `
+      <div class="skinEmoji">
+        ${skin.emoji}
+      </div>
+
+      <div class="skinName">
+        ${skin.name}
+      </div>
+
+      <div class="skinPrice">
+        ${
+          skin.price===0
+          ? "GRATIS"
+          : skin.price+" 🪙"
+        }
+      </div>
+
+      <button>
+        ${buttonText}
+      </button>
+      `;
+
+
+    card
+      .querySelector("button")
+      .onclick=()=>{
+
+        if(owned){
+
+          selectSkin(
+            skin.id
+          );
+
+          return;
+
+        }
+
+
+        if(wallet<skin.price){
+
+          alert(
+            "Koin kamu belum cukup untuk membeli karakter ini!"
+          );
+
+          return;
+
+        }
+
+
+        wallet-=
+          skin.price;
+
+
+        ownedSkins.push(
+          skin.id
+        );
+
+
+        localStorage.setItem(
+          "dragonCoins",
+          wallet
+        );
+
+
+        localStorage.setItem(
+          "dragonOwnedSkins",
+          JSON.stringify(
+            ownedSkins
+          )
+        );
+
+
+        selectSkin(
+          skin.id
+        );
+
+      };
+
+
+    grid.appendChild(
+      card
+    );
+
+  }
+
+}
+
+
+function selectSkin(
+  id
+){
+
+  selectedSkin=id;
+
+
+  localStorage.setItem(
+    "dragonSelectedSkin",
+    id
+  );
+
+
+  updateCharacterPreview();
+
+  renderCharacterShop();
+
+}
+
+
+/* =================================================
+   CHARACTER PREVIEW
+================================================= */
+
+function updateCharacterPreview(){
+
+  let skin=
+    getSkin();
+
+
+  document.getElementById(
+    "previewSnake"
+  ).textContent=
+    skin.emoji;
+
+
+  document.getElementById(
+    "selectedCharacter"
+  ).textContent=
+    skin.name;
+
+}
+
+
+/* =================================================
    JOYSTICK
-================================ */
+================================================= */
 
 const joystick=
   document.getElementById(
@@ -3458,12 +5292,15 @@ function updateJoystick(e){
 
 
   let d=
-    Math.hypot(x,y);
+    Math.hypot(
+      x,y
+    );
 
 
   if(d>max){
 
     x=x/d*max;
+
     y=y/d*max;
 
   }
@@ -3533,18 +5370,20 @@ function resetJoystick(){
 
 
   joystickX=0;
+
   joystickY=0;
 
 
   stick.style.left="50%";
+
   stick.style.top="50%";
 
 }
 
 
-/* ================================
+/* =================================================
    BOOST
-================================ */
+================================================= */
 
 const boostBtn=
   document.getElementById(
@@ -3596,9 +5435,9 @@ boostBtn.addEventListener(
 );
 
 
-/* ================================
+/* =================================================
    MOUSE PC
-================================ */
+================================================= */
 
 canvas.addEventListener(
   "mousemove",
@@ -3632,9 +5471,12 @@ canvas.addEventListener(
 );
 
 
-/* ================================
-   INITIAL UI
-================================ */
+/* =================================================
+   INITIAL
+================================================= */
+
+updateCharacterPreview();
+
 
 document.getElementById(
   "coinText"
