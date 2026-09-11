@@ -47,7 +47,7 @@ canvas{
   width:min(430px,100%);
   padding:28px 22px;
   border-radius:28px;
-  background:rgba(8,18,29,.92);
+  background:rgba(8,18,29,.94);
   border:2px solid rgba(255,255,255,.15);
   box-shadow:0 20px 60px #000;
   text-align:center;
@@ -95,7 +95,7 @@ input{
   margin-top:18px;
   color:#91a4b5;
   font-size:13px;
-  line-height:1.5;
+  line-height:1.6;
 }
 
 #gameUI{
@@ -117,7 +117,7 @@ input{
 }
 
 .stat{
-  background:rgba(4,13,22,.78);
+  background:rgba(4,13,22,.82);
   border:1px solid rgba(255,255,255,.15);
   border-radius:14px;
   padding:8px 12px;
@@ -132,7 +132,7 @@ input{
 .rank{
   min-width:150px;
   max-width:190px;
-  background:rgba(4,13,22,.78);
+  background:rgba(4,13,22,.82);
   border-radius:15px;
   padding:10px;
   font-size:12px;
@@ -283,7 +283,6 @@ input{
 
 <canvas id="gameCanvas"></canvas>
 
-<!-- MENU -->
 <div id="menu">
 
   <div class="menuBox">
@@ -306,8 +305,10 @@ input{
     </button>
 
     <div class="info">
-      🍎 Makan untuk bertambah besar<br>
+      🍰 Makan kue untuk bertambah besar<br>
+      💀 Kepala kena badan = MATI!<br>
       ⚔️ Adu kepala berdasarkan poin<br>
+      🤖 Musuh semakin sulit setiap level<br>
       🏆 Kalahkan ular lain dan jadi nomor 1!<br>
       📱 HP: gunakan joystick • PC: arahkan mouse
     </div>
@@ -316,8 +317,6 @@ input{
 
 </div>
 
-
-<!-- UI -->
 <div id="gameUI">
 
   <div class="top">
@@ -353,8 +352,6 @@ input{
 
 </div>
 
-
-<!-- GAME OVER -->
 <div id="gameOver">
 
   <div class="overBox">
@@ -379,28 +376,34 @@ input{
 
 </div>
 
-
 <script>
 
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+const canvas =
+  document.getElementById("gameCanvas");
 
-let W = 0;
-let H = 0;
+const ctx =
+  canvas.getContext("2d");
+
+let W=0;
+let H=0;
 
 function resize(){
-  W = canvas.width = window.innerWidth * devicePixelRatio;
-  H = canvas.height = window.innerHeight * devicePixelRatio;
 
-  canvas.style.width = window.innerWidth + "px";
-  canvas.style.height = window.innerHeight + "px";
+  W=window.innerWidth;
+  H=window.innerHeight;
+
+  const dpr=
+    Math.min(window.devicePixelRatio||1,2);
+
+  canvas.width=W*dpr;
+  canvas.height=H*dpr;
+
+  canvas.style.width=W+"px";
+  canvas.style.height=H+"px";
 
   ctx.setTransform(
-    devicePixelRatio,0,0,devicePixelRatio,0,0
+    dpr,0,0,dpr,0,0
   );
-
-  W = window.innerWidth;
-  H = window.innerHeight;
 }
 
 resize();
@@ -409,33 +412,39 @@ window.addEventListener("resize",resize);
 
 
 /* =========================
-   GAME VARIABLES
+   GAME
 ========================= */
 
 let player;
-let enemies = [];
-let foods = [];
-let coins = [];
+let enemies=[];
+let foods=[];
+let coins=[];
 
-let running = false;
-let level = 1;
-let kills = 0;
+let running=false;
 
-let mouseX = window.innerWidth / 2;
-let mouseY = window.innerHeight / 2;
+let level=1;
+let kills=0;
 
-let joystickActive = false;
+let mouseX=
+  window.innerWidth/2;
 
-let boost = false;
+let mouseY=
+  window.innerHeight/2;
 
-let worldSize = 2600;
+let joystickActive=false;
+
+let boost=false;
+
+let worldSize=2600;
+
+let lastTime=0;
 
 
 /* =========================
-   COLORS
+   ENEMY COLORS
 ========================= */
 
-const enemyColors = [
+const enemyColors=[
   "#ff4d6d",
   "#38bdf8",
   "#a78bfa",
@@ -451,14 +460,23 @@ const enemyColors = [
 ========================= */
 
 function random(min,max){
-  return Math.random() * (max-min) + min;
+
+  return Math.random()*(max-min)+min;
+
 }
 
+
+/* =========================
+   DISTANCE
+========================= */
+
 function distance(a,b){
+
   return Math.hypot(
     a.x-b.x,
     a.y-b.y
   );
+
 }
 
 
@@ -468,13 +486,14 @@ function distance(a,b){
 
 function createPlayer(){
 
-  return {
+  return{
+
     x:0,
     y:0,
 
     angle:0,
 
-    speed:2.5,
+    speed:2.7,
 
     radius:16,
 
@@ -485,11 +504,14 @@ function createPlayer(){
     color:"#22c55e",
 
     name:
-      document.getElementById("playerName")
-      .value.trim() || "Dimas",
+      document.getElementById(
+        "playerName"
+      ).value.trim() || "Dimas",
 
     boost:false
+
   };
+
 }
 
 
@@ -499,42 +521,47 @@ function createPlayer(){
 
 function createEnemy(index){
 
-  let angle = random(0,Math.PI*2);
+  let angle=
+    random(0,Math.PI*2);
 
-  let distanceFromCenter =
-    random(250,worldSize/2);
+  let dist=
+    random(400,worldSize*.85);
 
-  let x =
-    Math.cos(angle) * distanceFromCenter;
+  let x=
+    Math.cos(angle)*dist;
 
-  let y =
-    Math.sin(angle) * distanceFromCenter;
+  let y=
+    Math.sin(angle)*dist;
 
-  let score =
-    random(50,260) + level*15;
+  let score=
+    random(70,300)+level*25;
 
-  let enemy = {
+  let enemy={
 
     id:index,
 
     x:x,
-
     y:y,
 
-    angle:random(0,Math.PI*2),
+    angle:
+      random(0,Math.PI*2),
 
-    targetAngle:random(0,Math.PI*2),
+    targetAngle:
+      random(0,Math.PI*2),
 
-    speed:random(1.4,2.1),
+    speed:
+      1.8+level*.12,
 
     radius:14,
 
-    score:Math.floor(score),
+    score:
+      Math.floor(score),
 
     color:
       enemyColors[
         Math.floor(
-          Math.random()*enemyColors.length
+          Math.random()*
+          enemyColors.length
         )
       ],
 
@@ -551,15 +578,23 @@ function createEnemy(index){
         "Hunter",
         "Inferno"
       ][
-        Math.floor(Math.random()*10)
+        Math.floor(
+          Math.random()*10
+        )
       ],
 
     body:[],
 
     changeTimer:0
+
   };
 
-  for(let i=0;i<10+Math.floor(score/25);i++){
+
+  for(
+    let i=0;
+    i<10+Math.floor(score/25);
+    i++
+  ){
 
     enemy.body.push({
       x:x,
@@ -569,58 +604,73 @@ function createEnemy(index){
   }
 
   return enemy;
+
 }
 
 
 /* =========================
-   FOOD
+   CAKE FOOD 🍰
 ========================= */
 
 function createFood(){
 
-  return {
-    x:random(-worldSize,worldSize),
-    y:random(-worldSize,worldSize),
+  return{
+
+    x:
+      random(-worldSize,worldSize),
+
+    y:
+      random(-worldSize,worldSize),
 
     value:
-      Math.random()<.12 ? 20 : 5,
+      Math.random()<.15
+      ?20
+      :5,
 
     size:
-      Math.random()<.12 ? 9 : 6,
+      Math.random()<.15
+      ?13
+      :10
 
-    color:
-      Math.random()<.12
-      ? "#ffd43b"
-      : "#ff6b6b"
   };
+
 }
 
 
 /* =========================
-   COINS
+   COIN
 ========================= */
 
 function createCoin(){
 
-  return {
-    x:random(-worldSize,worldSize),
-    y:random(-worldSize,worldSize),
+  return{
+
+    x:
+      random(-worldSize,worldSize),
+
+    y:
+      random(-worldSize,worldSize),
+
     value:10
+
   };
+
 }
 
 
 /* =========================
-   START
+   START GAME
 ========================= */
 
 function startGame(){
 
-  document.getElementById("menu")
-    .style.display="none";
+  document.getElementById(
+    "menu"
+  ).style.display="none";
 
-  document.getElementById("gameOver")
-    .style.display="none";
+  document.getElementById(
+    "gameOver"
+  ).style.display="none";
 
   level=1;
   kills=0;
@@ -633,17 +683,49 @@ function startGame(){
   foods=[];
   coins=[];
 
-  for(let i=0;i<6;i++){
-    enemies.push(createEnemy(i));
+
+  /*
+    8 MUSUH
+  */
+
+  for(let i=0;i<8;i++){
+
+    enemies.push(
+      createEnemy(i)
+    );
+
   }
 
-  for(let i=0;i<140;i++){
-    foods.push(createFood());
+
+  /*
+    KUE
+  */
+
+  for(let i=0;i<170;i++){
+
+    foods.push(
+      createFood()
+    );
+
   }
 
-  for(let i=0;i<30;i++){
-    coins.push(createCoin());
+
+  /*
+    COIN
+  */
+
+  for(let i=0;i<35;i++){
+
+    coins.push(
+      createCoin()
+    );
+
   }
+
+
+  /*
+    PLAYER BODY
+  */
 
   player.body=[];
 
@@ -656,6 +738,7 @@ function startGame(){
 
   }
 
+
   running=true;
 
   showMessage(
@@ -663,7 +746,10 @@ function startGame(){
     1200
   );
 
+  lastTime=performance.now();
+
   requestAnimationFrame(gameLoop);
+
 }
 
 
@@ -671,57 +757,75 @@ function startGame(){
    MOUSE
 ========================= */
 
-canvas.addEventListener("mousemove",e=>{
+canvas.addEventListener(
+  "mousemove",
+  e=>{
 
-  mouseX=e.clientX;
-  mouseY=e.clientY;
-
-});
-
-
-canvas.addEventListener("touchmove",e=>{
-
-  if(e.touches.length){
-
-    mouseX=e.touches[0].clientX;
-    mouseY=e.touches[0].clientY;
+    mouseX=e.clientX;
+    mouseY=e.clientY;
 
   }
+);
 
-},{passive:true});
+
+/* =========================
+   TOUCH
+========================= */
+
+canvas.addEventListener(
+  "touchmove",
+  e=>{
+
+    if(e.touches.length){
+
+      mouseX=e.touches[0].clientX;
+      mouseY=e.touches[0].clientY;
+
+    }
+
+  },
+  {passive:true}
+);
 
 
 /* =========================
    JOYSTICK
 ========================= */
 
-const joystick =
-  document.getElementById("joystick");
+const joystick=
+  document.getElementById(
+    "joystick"
+  );
 
-const stick =
-  document.getElementById("stick");
+const stick=
+  document.getElementById(
+    "stick"
+  );
+
 
 function joystickMove(e){
 
-  let rect =
+  let rect=
     joystick.getBoundingClientRect();
 
-  let cx =
-    rect.left + rect.width/2;
+  let cx=
+    rect.left+
+    rect.width/2;
 
-  let cy =
-    rect.top + rect.height/2;
+  let cy=
+    rect.top+
+    rect.height/2;
 
-  let x =
+  let x=
     e.clientX-cx;
 
-  let y =
+  let y=
     e.clientY-cy;
 
-  let max =
+  let max=
     rect.width/2-27;
 
-  let len =
+  let len=
     Math.hypot(x,y);
 
   if(len>max){
@@ -731,12 +835,12 @@ function joystickMove(e){
 
   }
 
-  stick.style.transform =
+  stick.style.transform=
     `translate(${x}px,${y}px)`;
 
   if(Math.hypot(x,y)>10){
 
-    player.angle =
+    player.angle=
       Math.atan2(y,x);
 
     joystickActive=true;
@@ -745,25 +849,49 @@ function joystickMove(e){
 
 }
 
-joystick.addEventListener(
-  "pointermove",
-  joystickMove
-);
 
 joystick.addEventListener(
   "pointerdown",
   e=>{
-    joystick.setPointerCapture(e.pointerId);
+
+    joystick.setPointerCapture(
+      e.pointerId
+    );
+
     joystickMove(e);
+
   }
 );
+
+
+joystick.addEventListener(
+  "pointermove",
+  e=>{
+
+    if(e.buttons)
+      joystickMove(e);
+
+  }
+);
+
 
 joystick.addEventListener(
   "pointerup",
   ()=>{
     joystickActive=false;
 
-    stick.style.transform =
+    stick.style.transform=
+      "translate(0,0)";
+  }
+);
+
+
+joystick.addEventListener(
+  "pointercancel",
+  ()=>{
+    joystickActive=false;
+
+    stick.style.transform=
       "translate(0,0)";
   }
 );
@@ -773,12 +901,15 @@ joystick.addEventListener(
    BOOST
 ========================= */
 
-const boostBtn =
-  document.getElementById("boostBtn");
+const boostBtn=
+  document.getElementById(
+    "boostBtn"
+  );
 
 boostBtn.addEventListener(
   "pointerdown",
-  ()=>{
+  e=>{
+    e.preventDefault();
     boost=true;
   }
 );
@@ -797,6 +928,13 @@ boostBtn.addEventListener(
   }
 );
 
+boostBtn.addEventListener(
+  "pointerleave",
+  ()=>{
+    boost=false;
+  }
+);
+
 
 /* =========================
    PLAYER UPDATE
@@ -806,23 +944,27 @@ function updatePlayer(){
 
   if(!joystickActive){
 
-    let dx =
+    let dx=
       mouseX-W/2;
 
-    let dy =
+    let dy=
       mouseY-H/2;
 
-    if(Math.hypot(dx,dy)>20){
+    if(Math.hypot(dx,dy)>15){
 
-      player.angle =
+      player.angle=
         Math.atan2(dy,dx);
 
     }
 
   }
 
-  let speed =
-    boost ? 4.4 : 2.5;
+
+  let speed=
+    boost
+    ?4.8
+    :2.7;
+
 
   player.x +=
     Math.cos(player.angle)*speed;
@@ -831,7 +973,9 @@ function updatePlayer(){
     Math.sin(player.angle)*speed;
 
 
-  /* WORLD BORDER */
+  /*
+    WORLD WRAP
+  */
 
   if(player.x>worldSize)
     player.x=-worldSize;
@@ -846,7 +990,9 @@ function updatePlayer(){
     player.y=worldSize;
 
 
-  /* BODY */
+  /*
+    BODY
+  */
 
   player.body.unshift({
     x:player.x,
@@ -854,18 +1000,24 @@ function updatePlayer(){
   });
 
 
-  let wanted =
-    10 + Math.floor(player.score/5);
+  let wanted=
+    12+
+    Math.floor(player.score/5);
 
-  while(player.body.length>wanted){
+
+  while(
+    player.body.length>wanted
+  ){
+
     player.body.pop();
+
   }
 
 }
 
 
 /* =========================
-   ENEMY AI
+   HARD ENEMY AI 🤖
 ========================= */
 
 function updateEnemies(){
@@ -874,59 +1026,160 @@ function updateEnemies(){
 
     enemy.changeTimer--;
 
-    if(enemy.changeTimer<=0){
 
-      enemy.changeTimer =
-        random(40,130);
+    let dx=
+      player.x-enemy.x;
+
+    let dy=
+      player.y-enemy.y;
+
+    let distToPlayer=
+      Math.hypot(dx,dy);
+
+
+    /*
+      AGGRESSIVE RANGE
+    */
+
+    let aggressiveRange=
+      850+
+      level*80;
+
+
+    if(
+      distToPlayer<
+      aggressiveRange
+    ){
 
       /*
-        AI mencari makanan
-        atau bergerak random
+        PREDICT PLAYER
       */
 
-      let nearestFood=null;
+      let predict=
+        120+
+        level*20;
 
-      let nearestDist=Infinity;
+      let targetX=
+        player.x+
+        Math.cos(player.angle)*
+        predict;
 
-      foods.forEach(food=>{
+      let targetY=
+        player.y+
+        Math.sin(player.angle)*
+        predict;
 
-        let d =
-          Math.hypot(
-            enemy.x-food.x,
-            enemy.y-food.y
+
+      enemy.targetAngle=
+        Math.atan2(
+          targetY-enemy.y,
+          targetX-enemy.x
+        );
+
+
+      /*
+        MUSUH LEBIH BESAR
+        LEBIH AGRESIF
+      */
+
+      enemy.speed=
+        2+
+        level*.14;
+
+
+      if(
+        enemy.score>
+        player.score
+      ){
+
+        enemy.speed+=.5;
+
+      }
+
+    }else{
+
+      /*
+        CARI KUE
+      */
+
+      if(
+        enemy.changeTimer<=0
+      ){
+
+        enemy.changeTimer=
+          random(
+            25,
+            Math.max(
+              60,
+              140-level*5
+            )
           );
 
-        if(d<nearestDist){
 
-          nearestDist=d;
-          nearestFood=food;
+        let nearestFood=null;
+
+        let nearestDist=
+          Infinity;
+
+
+        foods.forEach(food=>{
+
+          let d=
+            Math.hypot(
+              enemy.x-food.x,
+              enemy.y-food.y
+            );
+
+
+          if(d<nearestDist){
+
+            nearestDist=d;
+            nearestFood=food;
+
+          }
+
+        });
+
+
+        if(
+          nearestFood &&
+          nearestDist<700
+        ){
+
+          enemy.targetAngle=
+            Math.atan2(
+              nearestFood.y-enemy.y,
+              nearestFood.x-enemy.x
+            );
+
+        }else{
+
+          enemy.targetAngle=
+            random(
+              0,
+              Math.PI*2
+            );
 
         }
 
-      });
-
-      if(nearestFood && nearestDist<450){
-
-        enemy.targetAngle =
-          Math.atan2(
-            nearestFood.y-enemy.y,
-            nearestFood.x-enemy.x
-          );
-
-      }else{
-
-        enemy.targetAngle =
-          random(0,Math.PI*2);
-
       }
+
+
+      enemy.speed=
+        1.7+
+        level*.10;
 
     }
 
 
-    /* Smooth turn */
+    /*
+      TURN
+    */
 
-    let diff =
-      enemy.targetAngle-enemy.angle;
+    let diff=
+      enemy.targetAngle-
+      enemy.angle;
+
 
     while(diff>Math.PI)
       diff-=Math.PI*2;
@@ -934,16 +1187,28 @@ function updateEnemies(){
     while(diff<-Math.PI)
       diff+=Math.PI*2;
 
-    enemy.angle +=
-      diff*.045;
 
+    enemy.angle +=
+      diff*
+      (.055+level*.003);
+
+
+    /*
+      MOVE
+    */
 
     enemy.x +=
-      Math.cos(enemy.angle)*enemy.speed;
+      Math.cos(enemy.angle)*
+      enemy.speed;
 
     enemy.y +=
-      Math.sin(enemy.angle)*enemy.speed;
+      Math.sin(enemy.angle)*
+      enemy.speed;
 
+
+    /*
+      WRAP
+    */
 
     if(enemy.x>worldSize)
       enemy.x=-worldSize;
@@ -958,17 +1223,28 @@ function updateEnemies(){
       enemy.y=worldSize;
 
 
+    /*
+      BODY
+    */
+
     enemy.body.unshift({
       x:enemy.x,
       y:enemy.y
     });
 
 
-    let wanted =
-      10 + Math.floor(enemy.score/5);
+    let wanted=
+      12+
+      Math.floor(enemy.score/5);
 
-    while(enemy.body.length>wanted)
+
+    while(
+      enemy.body.length>wanted
+    ){
+
       enemy.body.pop();
+
+    }
 
   });
 
@@ -976,12 +1252,16 @@ function updateEnemies(){
 
 
 /* =========================
-   FOOD COLLISION
+   EAT CAKE
 ========================= */
 
 function eatFood(){
 
-  for(let i=foods.length-1;i>=0;i--){
+  for(
+    let i=foods.length-1;
+    i>=0;
+    i--
+  ){
 
     let food=foods[i];
 
@@ -991,19 +1271,23 @@ function eatFood(){
         player.y-food.y
       )
       <
-      player.radius+food.size
+      player.radius+
+      food.size
     ){
 
-      player.score += food.value;
+      player.score+=food.value;
 
       foods.splice(i,1);
 
-      foods.push(createFood());
+      foods.push(
+        createFood()
+      );
+
 
       if(food.value>=20){
 
         showMessage(
-          "💎 BIG FOOD +20",
+          "🍰 KUE BESAR +20!",
           600
         );
 
@@ -1014,9 +1298,15 @@ function eatFood(){
   }
 
 
-  /* COINS */
+  /*
+    COINS
+  */
 
-  for(let i=coins.length-1;i>=0;i--){
+  for(
+    let i=coins.length-1;
+    i>=0;
+    i--
+  ){
 
     let coin=coins[i];
 
@@ -1029,11 +1319,13 @@ function eatFood(){
       player.radius+12
     ){
 
-      player.score += coin.value;
+      player.score+=10;
 
       coins.splice(i,1);
 
-      coins.push(createCoin());
+      coins.push(
+        createCoin()
+      );
 
       showMessage(
         "🪙 +10 COIN",
@@ -1048,105 +1340,101 @@ function eatFood(){
 
 
 /* =========================
-   PLAYER VS ENEMY
    HEAD VS HEAD
 ========================= */
 
 function headBattle(){
 
-  for(let i=enemies.length-1;i>=0;i--){
+  for(
+    let i=enemies.length-1;
+    i>=0;
+    i--
+  ){
 
     let enemy=enemies[i];
 
-    let d =
+    let d=
       Math.hypot(
         player.x-enemy.x,
         player.y-enemy.y
       );
 
 
-    if(d < player.radius+enemy.radius+5){
+    if(
+      d<
+      player.radius+
+      enemy.radius+
+      5
+    ){
 
       /*
-        POIN LEBIH BESAR MENANG
+        PLAYER MENANG
       */
 
-      if(player.score>enemy.score){
+      if(
+        player.score>
+        enemy.score
+      ){
 
-        let reward =
-          Math.floor(enemy.score*.6);
+        let reward=
+          Math.floor(
+            enemy.score*.6
+          );
 
-        player.score += reward;
+        player.score+=reward;
 
         kills++;
 
+
         showMessage(
-          "⚔️ MUSUH KALAH! +" +
-          reward +
+          "⚔️ "+enemy.name+
+          " KALAH! +"+
+          reward+
           " POIN",
           1300
         );
 
 
-        /* Musuh berubah menjadi makanan */
-
-        for(let j=0;j<10;j++){
-
-          foods.push({
-            x:
-              enemy.x+
-              random(-80,80),
-
-            y:
-              enemy.y+
-              random(-80,80),
-
-            value:
-              8,
-
-            size:
-              7,
-
-            color:
-              "#ffd43b"
-          });
-
-        }
+        dropEnemyFood(enemy);
 
 
         enemies.splice(i,1);
 
         enemies.push(
           createEnemy(
-            Math.random()*1000
+            Math.random()*10000
           )
         );
 
 
-      }else if(player.score<enemy.score){
+      }
+
+      /*
+        PLAYER KALAH
+      */
+
+      else if(
+        player.score<
+        enemy.score
+      ){
 
         gameOver(
-          enemy.name+
-          " lebih besar dari kamu!"
+          "💀 "+enemy.name+
+          " mengalahkanmu!"
         );
 
         return;
 
+      }
 
-      }else{
+      /*
+        SERI
+      */
 
-        /*
-          POIN SAMA
-          KEDUANYA HANCUR
-        */
-
-        showMessage(
-          "💥 IMBANG! KEDUANYA KALAH!",
-          1200
-        );
+      else{
 
         gameOver(
-          "Pertarungan berakhir seri!"
+          "💥 Head-to-head seri!"
         );
 
         return;
@@ -1161,27 +1449,232 @@ function headBattle(){
 
 
 /* =========================
+   BODY COLLISION
+========================= */
+
+function bodyCollision(){
+
+  /*
+    KEPALA PLAYER
+    MENABRAK BADAN MUSUH
+  */
+
+  for(
+    let i=enemies.length-1;
+    i>=0;
+    i--
+  ){
+
+    let enemy=enemies[i];
+
+
+    /*
+      Mulai dari bagian ke-7
+      agar kepala musuh tidak
+      dihitung sebagai badan.
+    */
+
+    for(
+      let j=7;
+      j<enemy.body.length;
+      j+=2
+    ){
+
+      let part=
+        enemy.body[j];
+
+
+      let d=
+        Math.hypot(
+          player.x-part.x,
+          player.y-part.y
+        );
+
+
+      if(
+        d<
+        player.radius+
+        enemy.radius*.72
+      ){
+
+        gameOver(
+          "💀 Kamu menabrak badan "+
+          enemy.name+"!"
+        );
+
+        return;
+
+      }
+
+    }
+
+  }
+
+
+  /*
+    KEPALA MUSUH
+    MENABRAK BADAN PLAYER
+  */
+
+  for(
+    let i=enemies.length-1;
+    i>=0;
+    i--
+  ){
+
+    let enemy=enemies[i];
+
+
+    for(
+      let j=8;
+      j<player.body.length;
+      j+=2
+    ){
+
+      let part=
+        player.body[j];
+
+
+      let d=
+        Math.hypot(
+          enemy.x-part.x,
+          enemy.y-part.y
+        );
+
+
+      if(
+        d<
+        enemy.radius+
+        player.radius*.72
+      ){
+
+        let reward=
+          Math.floor(
+            enemy.score*.7
+          );
+
+
+        player.score+=reward;
+
+        kills++;
+
+
+        showMessage(
+          "💥 "+enemy.name+
+          " MENABRAK BADANMU! +"+
+          reward,
+          1400
+        );
+
+
+        /*
+          MUSUH MENJADI KUE
+        */
+
+        dropEnemyFood(enemy);
+
+
+        enemies.splice(i,1);
+
+        enemies.push(
+          createEnemy(
+            Math.random()*10000
+          )
+        );
+
+        return;
+
+      }
+
+    }
+
+  }
+
+}
+
+
+/* =========================
+   ENEMY DEATH FOOD
+========================= */
+
+function dropEnemyFood(enemy){
+
+  let amount=
+    Math.min(
+      30,
+      Math.max(
+        12,
+        Math.floor(
+          enemy.body.length/2
+        )
+      )
+    );
+
+
+  for(let i=0;i<amount;i++){
+
+    let part=
+      enemy.body[
+        Math.floor(
+          Math.random()*
+          enemy.body.length
+        )
+      ];
+
+
+    foods.push({
+
+      x:
+        part.x+
+        random(-35,35),
+
+      y:
+        part.y+
+        random(-35,35),
+
+      value:
+        Math.random()<.25
+        ?20
+        :5,
+
+      size:
+        Math.random()<.25
+        ?13
+        :10
+
+    });
+
+  }
+
+}
+
+
+/* =========================
    LEVEL
 ========================= */
 
 function updateLevel(){
 
-  let newLevel =
+  let newLevel=
     Math.min(
       10,
-      1+Math.floor(
+      1+
+      Math.floor(
         player.score/150
       )
     );
 
 
-  if(newLevel>level){
+  if(
+    newLevel>level
+  ){
 
     level=newLevel;
 
+
     showMessage(
-      "🎉 LEVEL " +
-      level +
+      "🔥 LEVEL "+
+      level+
       "!",
       1200
     );
@@ -1191,11 +1684,14 @@ function updateLevel(){
       Tambah musuh
     */
 
-    if(enemies.length<12){
+    if(
+      enemies.length<
+      Math.min(14,8+level)
+    ){
 
       enemies.push(
         createEnemy(
-          Math.random()*1000
+          Math.random()*10000
         )
       );
 
@@ -1222,11 +1718,12 @@ function drawWorld(){
   );
 
 
-  /*
-    CAMERA mengikuti player
-  */
-
   ctx.save();
+
+
+  /*
+    CAMERA
+  */
 
   ctx.translate(
     W/2-player.x,
@@ -1245,6 +1742,7 @@ function drawWorld(){
 
   ctx.lineWidth=1;
 
+
   for(
     let x=-worldSize;
     x<=worldSize;
@@ -1253,13 +1751,20 @@ function drawWorld(){
 
     ctx.beginPath();
 
-    ctx.moveTo(x,-worldSize);
+    ctx.moveTo(
+      x,
+      -worldSize
+    );
 
-    ctx.lineTo(x,worldSize);
+    ctx.lineTo(
+      x,
+      worldSize
+    );
 
     ctx.stroke();
 
   }
+
 
   for(
     let y=-worldSize;
@@ -1269,9 +1774,15 @@ function drawWorld(){
 
     ctx.beginPath();
 
-    ctx.moveTo(-worldSize,y);
+    ctx.moveTo(
+      -worldSize,
+      y
+    );
 
-    ctx.lineTo(worldSize,y);
+    ctx.lineTo(
+      worldSize,
+      y
+    );
 
     ctx.stroke();
 
@@ -1279,7 +1790,7 @@ function drawWorld(){
 
 
   /*
-    Arena border
+    ARENA BORDER
   */
 
   ctx.strokeStyle=
@@ -1299,9 +1810,12 @@ function drawWorld(){
 
   drawCoins();
 
-  enemies.forEach(drawSnake);
+  enemies.forEach(
+    drawSnake
+  );
 
   drawSnake(player);
+
 
   ctx.restore();
 
@@ -1309,32 +1823,148 @@ function drawWorld(){
 
 
 /* =========================
-   DRAW FOOD
+   DRAW CAKES
 ========================= */
 
 function drawFoods(){
 
   foods.forEach(food=>{
 
+    ctx.save();
+
+    ctx.translate(
+      food.x,
+      food.y
+    );
+
+
+    /*
+      SHADOW
+    */
+
+    ctx.fillStyle=
+      "rgba(0,0,0,.25)";
+
     ctx.beginPath();
 
-    ctx.arc(
-      food.x,
-      food.y,
-      food.size,
+    ctx.ellipse(
+      0,
+      9,
+      food.size+4,
+      5,
+      0,
       0,
       Math.PI*2
     );
 
-    ctx.fillStyle=food.color;
+    ctx.fill();
 
-    ctx.shadowBlur=12;
 
-    ctx.shadowColor=food.color;
+    /*
+      CAKE BODY
+    */
+
+    ctx.fillStyle=
+      "#d89452";
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+      -food.size,
+      -food.size/2,
+      food.size*2,
+      food.size*1.25,
+      5
+    );
 
     ctx.fill();
 
-    ctx.shadowBlur=0;
+
+    /*
+      CREAM
+    */
+
+    ctx.fillStyle=
+      "#fff5df";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+      0,
+      -food.size/2,
+      food.size,
+      food.size*.43,
+      0,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /*
+      CHOCOLATE
+    */
+
+    ctx.fillStyle=
+      "#713f12";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      -food.size*.45,
+      -food.size*.05,
+      2.5,
+      0,
+      Math.PI*2
+    );
+
+    ctx.arc(
+      food.size*.35,
+      -food.size*.15,
+      2.5,
+      0,
+      Math.PI*2
+    );
+
+    ctx.arc(
+      0,
+      food.size*.25,
+      2.5,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /*
+      BIG CAKE
+    */
+
+    if(food.value>=20){
+
+      ctx.strokeStyle=
+        "#ffd43b";
+
+      ctx.lineWidth=3;
+
+      ctx.shadowColor=
+        "#ffd43b";
+
+      ctx.shadowBlur=15;
+
+      ctx.strokeRect(
+        -food.size-2,
+        -food.size/2-2,
+        food.size*2+4,
+        food.size*1.25+4
+      );
+
+    }
+
+
+    ctx.restore();
 
   });
 
@@ -1356,6 +1986,7 @@ function drawCoins(){
       coin.y
     );
 
+
     ctx.beginPath();
 
     ctx.arc(
@@ -1366,29 +1997,37 @@ function drawCoins(){
       Math.PI*2
     );
 
-    ctx.fillStyle="#ffd43b";
+    ctx.fillStyle=
+      "#ffd43b";
 
     ctx.fill();
 
-    ctx.strokeStyle="#fff";
+    ctx.strokeStyle=
+      "#fff";
 
     ctx.lineWidth=2;
 
     ctx.stroke();
 
-    ctx.fillStyle="#9b6500";
 
-    ctx.font="bold 11px Arial";
+    ctx.fillStyle=
+      "#9b6500";
 
-    ctx.textAlign="center";
+    ctx.font=
+      "bold 11px Arial";
 
-    ctx.textBaseline="middle";
+    ctx.textAlign=
+      "center";
+
+    ctx.textBaseline=
+      "middle";
 
     ctx.fillText(
       "$",
       0,
       1
     );
+
 
     ctx.restore();
 
@@ -1404,7 +2043,7 @@ function drawCoins(){
 function drawSnake(snake){
 
   /*
-    Body dari belakang
+    BODY
   */
 
   for(
@@ -1413,14 +2052,17 @@ function drawSnake(snake){
     i--
   ){
 
-    let part=snake.body[i];
+    let part=
+      snake.body[i];
+
 
     let ratio=
       i/snake.body.length;
 
-    let r =
+
+    let r=
       snake.radius*
-      (0.65+ratio*.35);
+      (.65+ratio*.35);
 
 
     ctx.beginPath();
@@ -1433,11 +2075,11 @@ function drawSnake(snake){
       Math.PI*2
     );
 
+
     ctx.fillStyle=
       snake.color;
 
-    ctx.globalAlpha=
-      .92;
+    ctx.globalAlpha=.92;
 
     ctx.fill();
 
@@ -1445,7 +2087,7 @@ function drawSnake(snake){
 
 
     /*
-      Pattern
+      SCALE
     */
 
     if(i%5===0){
@@ -1486,10 +2128,6 @@ function drawSnake(snake){
   );
 
 
-  /*
-    Head
-  */
-
   ctx.beginPath();
 
   ctx.arc(
@@ -1507,10 +2145,12 @@ function drawSnake(snake){
 
 
   /*
-    Dragon horns
+    HORNS
   */
 
-  ctx.fillStyle="#f8fafc";
+  ctx.fillStyle=
+    "#f8fafc";
+
 
   ctx.beginPath();
 
@@ -1530,6 +2170,7 @@ function drawSnake(snake){
   );
 
   ctx.fill();
+
 
   ctx.beginPath();
 
@@ -1552,10 +2193,12 @@ function drawSnake(snake){
 
 
   /*
-    Eyes
+    EYES
   */
 
-  ctx.fillStyle="white";
+  ctx.fillStyle=
+    "white";
+
 
   ctx.beginPath();
 
@@ -1580,6 +2223,7 @@ function drawSnake(snake){
 
   ctx.fillStyle="#111";
 
+
   ctx.beginPath();
 
   ctx.arc(
@@ -1602,7 +2246,7 @@ function drawSnake(snake){
 
 
   /*
-    Mouth
+    MOUTH
   */
 
   ctx.strokeStyle=
@@ -1632,20 +2276,26 @@ function drawSnake(snake){
     NAME
   */
 
-  ctx.fillStyle="white";
+  ctx.fillStyle=
+    "white";
 
-  ctx.font="bold 12px Arial";
+  ctx.font=
+    "bold 12px Arial";
 
-  ctx.textAlign="center";
+  ctx.textAlign=
+    "center";
 
-  ctx.shadowColor="#000";
+  ctx.shadowColor=
+    "#000";
 
   ctx.shadowBlur=4;
 
   ctx.fillText(
-    snake.name || "",
+    snake.name||"",
     snake.x,
-    snake.y-snake.radius-17
+    snake.y-
+    snake.radius-
+    17
   );
 
   ctx.shadowBlur=0;
@@ -1667,6 +2317,7 @@ function updateLeaderboard(){
     }
   ];
 
+
   enemies.forEach(e=>{
 
     list.push({
@@ -1679,26 +2330,32 @@ function updateLeaderboard(){
 
 
   list.sort(
-    (a,b)=>b.score-a.score
+    (a,b)=>
+      b.score-a.score
   );
 
 
   let html="";
 
-  list.slice(0,5).forEach(
-    (p,i)=>{
 
-      html += `
-        <div class="rankRow">
-          <span>
-            ${i+1}. ${p.name}
-          </span>
-          <b>${Math.floor(p.score)}</b>
-        </div>
-      `;
+  list
+    .slice(0,5)
+    .forEach(
+      (p,i)=>{
 
-    }
-  );
+        html+=`
+          <div class="rankRow">
+            <span>
+              ${i+1}. ${p.name}
+            </span>
+            <b>
+              ${Math.floor(p.score)}
+            </b>
+          </div>
+        `;
+
+      }
+    );
 
 
   document.getElementById(
@@ -1716,21 +2373,29 @@ function updateUI(){
 
   document.getElementById(
     "nameUI"
-  ).innerText=player.name;
+  ).innerText=
+    player.name;
+
 
   document.getElementById(
     "scoreUI"
   ).innerText=
-    Math.floor(player.score);
+    Math.floor(
+      player.score
+    );
+
 
   document.getElementById(
     "lengthUI"
   ).innerText=
     player.body.length;
 
+
   document.getElementById(
     "levelUI"
-  ).innerText=level;
+  ).innerText=
+    level;
+
 
   updateLeaderboard();
 
@@ -1743,21 +2408,36 @@ function updateUI(){
 
 let messageTimer;
 
-function showMessage(text,time=1000){
+
+function showMessage(
+  text,
+  time=1000
+){
 
   const el=
-    document.getElementById("message");
+    document.getElementById(
+      "message"
+    );
+
 
   el.innerText=text;
 
-  el.classList.add("show");
+  el.classList.add(
+    "show"
+  );
 
-  clearTimeout(messageTimer);
+
+  clearTimeout(
+    messageTimer
+  );
+
 
   messageTimer=
     setTimeout(
       ()=>{
-        el.classList.remove("show");
+        el.classList.remove(
+          "show"
+        );
       },
       time
     );
@@ -1773,18 +2453,27 @@ function gameOver(reason){
 
   running=false;
 
+  boost=false;
+
+
   document.getElementById(
     "finalScore"
   ).innerText=
-    Math.floor(player.score);
+    Math.floor(
+      player.score
+    );
+
 
   document.getElementById(
     "overText"
-  ).innerText=reason;
+  ).innerText=
+    reason;
+
 
   document.getElementById(
     "gameOver"
-  ).style.display="flex";
+  ).style.display=
+    "flex";
 
 }
 
@@ -1797,7 +2486,9 @@ function restartGame(){
 
   document.getElementById(
     "gameOver"
-  ).style.display="none";
+  ).style.display=
+    "none";
+
 
   startGame();
 
@@ -1808,8 +2499,6 @@ function restartGame(){
    GAME LOOP
 ========================= */
 
-let lastTime=0;
-
 function gameLoop(time){
 
   if(!running)
@@ -1817,12 +2506,15 @@ function gameLoop(time){
 
 
   /*
-    Jangan terlalu cepat
+    Update kira-kira 60 FPS
   */
 
-  if(time-lastTime>10){
+  if(
+    time-lastTime>=10
+  ){
 
     lastTime=time;
+
 
     updatePlayer();
 
@@ -1831,6 +2523,18 @@ function gameLoop(time){
     eatFood();
 
     headBattle();
+
+
+    if(!running)
+      return;
+
+
+    bodyCollision();
+
+
+    if(!running)
+      return;
+
 
     updateLevel();
 
@@ -1842,7 +2546,9 @@ function gameLoop(time){
   drawWorld();
 
 
-  requestAnimationFrame(gameLoop);
+  requestAnimationFrame(
+    gameLoop
+  );
 
 }
 
@@ -1864,27 +2570,33 @@ document.addEventListener(
       e.key.toLowerCase()==="w"
     ){
 
-      player.angle=-Math.PI/2;
+      player.angle=
+        -Math.PI/2;
 
     }
+
 
     if(
       e.key==="ArrowDown" ||
       e.key.toLowerCase()==="s"
     ){
 
-      player.angle=Math.PI/2;
+      player.angle=
+        Math.PI/2;
 
     }
+
 
     if(
       e.key==="ArrowLeft" ||
       e.key.toLowerCase()==="a"
     ){
 
-      player.angle=Math.PI;
+      player.angle=
+        Math.PI;
 
     }
+
 
     if(
       e.key==="ArrowRight" ||
@@ -1895,7 +2607,10 @@ document.addEventListener(
 
     }
 
-    if(e.code==="Space"){
+
+    if(
+      e.code==="Space"
+    ){
 
       boost=true;
 
@@ -1904,11 +2619,14 @@ document.addEventListener(
   }
 );
 
+
 document.addEventListener(
   "keyup",
   e=>{
 
-    if(e.code==="Space"){
+    if(
+      e.code==="Space"
+    ){
 
       boost=false;
 
@@ -1925,8 +2643,10 @@ document.addEventListener(
 document.addEventListener(
   "touchmove",
   e=>{
+
     if(running)
       e.preventDefault();
+
   },
   {passive:false}
 );
