@@ -26,8 +26,7 @@ viewport-fit=cover">
   -webkit-touch-callout:none;
 }
 
-html,
-body{
+html,body{
   width:100%;
   height:100%;
   overflow:hidden;
@@ -41,8 +40,7 @@ body{
   overscroll-behavior:none;
 }
 
-button,
-input{
+button,input{
   font-family:Arial,sans-serif;
 }
 
@@ -139,6 +137,19 @@ input{
   width:280px;
 }
 
+#mapBtn{
+  width:280px;
+  margin-bottom:10px;
+  background:#176b3a;
+  color:#fff;
+  border:1px solid #2b9a58;
+}
+
+#selectedMap{
+  color:#ffd400;
+  font-weight:bold;
+}
+
 #game{
   display:none;
   position:fixed;
@@ -199,6 +210,23 @@ canvas{
   padding:6px 9px;
   border-radius:8px;
   display:none;
+}
+
+#specialUI{
+  position:fixed;
+  top:112px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:6;
+  background:rgba(0,0,0,.72);
+  border:1px solid rgba(255,215,0,.35);
+  padding:7px 12px;
+  border-radius:10px;
+  color:#fff;
+  font-size:11px;
+  display:none;
+  pointer-events:none;
+  white-space:nowrap;
 }
 
 #miniMap{
@@ -284,11 +312,13 @@ canvas{
   font-size:11px;
   color:#ddd;
   pointer-events:none;
+  white-space:nowrap;
 }
 
 #shop,
 #gameOver,
-#characterShop{
+#characterShop,
+#mapShop{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.84);
@@ -375,6 +405,38 @@ canvas{
   box-shadow:0 0 15px rgba(0,229,255,.3);
 }
 
+.mapCard{
+  background:#222;
+  border:1px solid #333;
+  border-radius:15px;
+  padding:16px;
+  margin:10px 0;
+  text-align:left;
+  cursor:pointer;
+}
+
+.mapCard.active{
+  border:2px solid #ffd400;
+  box-shadow:0 0 18px rgba(255,212,0,.25);
+}
+
+.mapIcon{
+  font-size:35px;
+  float:left;
+  margin-right:12px;
+}
+
+.mapCard h3{
+  color:#fff;
+  margin-bottom:5px;
+}
+
+.mapCard p{
+  color:#aaa;
+  font-size:12px;
+  line-height:1.4;
+}
+
 .closeBtn{
   margin-top:15px;
   background:#444;
@@ -420,6 +482,11 @@ canvas{
   #boostCost{
     right:25px;
     bottom:max(125px,calc(env(safe-area-inset-bottom) + 125px));
+  }
+
+  #specialUI{
+    top:105px;
+    font-size:10px;
   }
 
 }
@@ -490,6 +557,16 @@ canvas{
     onclick="openCharacterShop()"
   >
     🐍 PILIH KARAKTER
+  </button>
+
+  <button
+    id="mapBtn"
+    onclick="openMapShop()"
+  >
+    🗺️ MAP:
+    <span id="selectedMap">
+      MAP HIJAU
+    </span>
   </button>
 
   <button
@@ -575,6 +652,9 @@ canvas{
 </div>
 
 
+<div id="specialUI"></div>
+
+
 <div id="zoneInfo">
   🗺️ Jelajahi map • Hindari jurang!
 </div>
@@ -599,6 +679,8 @@ canvas{
 </div>
 
 
+<!-- POWER SHOP -->
+
 <div id="shop">
 
   <div class="modal">
@@ -611,55 +693,43 @@ canvas{
     </div>
 
     <div class="shopItem">
-
       <span>
         🧲 Magnet<br>
         <small>Tarik item dari jauh</small>
       </span>
-
       <button onclick="buyPower('magnet',50)">
         50 🪙
       </button>
-
     </div>
 
     <div class="shopItem">
-
       <span>
         🔭 Zoom<br>
         <small>Penglihatan lebih luas</small>
       </span>
-
       <button onclick="buyPower('zoom',80)">
         80 🪙
       </button>
-
     </div>
 
     <div class="shopItem">
-
       <span>
         💰 Bonus 5×<br>
         <small>Nilai makanan & koin</small>
       </span>
-
       <button onclick="buyPower('bonus',100)">
         100 🪙
       </button>
-
     </div>
 
     <div class="shopItem">
-
       <span>
         ⚡ Speed 2×<br>
         <small>Kecepatan meningkat</small>
       </span>
-
       <button onclick="buyPower('speed',100)">
         100 🪙
       </button>
-
     </div>
 
     <button
@@ -674,6 +744,8 @@ canvas{
 </div>
 
 
+<!-- CHARACTER SHOP -->
+
 <div id="characterShop">
 
   <div class="modal">
@@ -681,10 +753,8 @@ canvas{
     <h2>🐍 CHARACTER SHOP</h2>
 
     <div style="margin-bottom:12px">
-
       🪙 Koin:
       <b id="characterCoins">0</b>
-
     </div>
 
     <div
@@ -703,6 +773,65 @@ canvas{
 
 </div>
 
+
+<!-- MAP SHOP -->
+
+<div id="mapShop">
+
+  <div class="modal">
+
+    <h2>🗺️ PILIH MAP</h2>
+
+    <div
+      class="mapCard"
+      id="greenMapCard"
+      onclick="selectMap('green')"
+    >
+
+      <div class="mapIcon">🌿</div>
+
+      <h3>MAP HIJAU</h3>
+
+      <p>
+        Map utama dengan zona ramai, sedang,
+        sepi dan jurang di bagian luar.
+      </p>
+
+    </div>
+
+
+    <div
+      class="mapCard"
+      id="beachMapCard"
+      onclick="selectMap('beach')"
+    >
+
+      <div class="mapIcon">🏖️</div>
+
+      <h3>PASIR PANTAI</h3>
+
+      <p>
+        Arena pasir dengan laut,
+        pohon kelapa, kerang dan batu.
+        🪨 Batu berbahaya dan bisa membunuh ular.
+      </p>
+
+    </div>
+
+
+    <button
+      class="closeBtn"
+      onclick="closeMapShop()"
+    >
+      TUTUP
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- GAME OVER -->
 
 <div id="gameOver">
 
@@ -827,6 +956,39 @@ const WARNING=140;
 
 
 /* =================================================
+   MAP SYSTEM
+================================================= */
+
+const MAPS={
+
+  green:{
+    id:"green",
+    name:"MAP HIJAU",
+    icon:"🌿"
+  },
+
+  beach:{
+    id:"beach",
+    name:"PASIR PANTAI",
+    icon:"🏖️"
+  }
+
+};
+
+
+let selectedMap=
+  localStorage.getItem(
+    "dragonSelectedMap"
+  ) ||
+  "green";
+
+
+if(!MAPS[selectedMap]){
+  selectedMap="green";
+}
+
+
+/* =================================================
    MAP ZONES
 ================================================= */
 
@@ -875,6 +1037,198 @@ const MAP_ZONES=[
   }
 
 ];
+
+
+/* =================================================
+   BEACH ROCKS
+================================================= */
+
+let rocks=[];
+
+
+/*
+  Batu hanya digunakan pada map pantai.
+  Batu menjadi obstacle mematikan.
+*/
+
+function createBeachRocks(){
+
+  rocks=[];
+
+  if(selectedMap!=="beach")
+    return;
+
+
+  let safeCenter={
+    x:WORLD/2,
+    y:WORLD/2
+  };
+
+
+  for(
+    let i=0;
+    i<75;
+    i++
+  ){
+
+    let p;
+
+    let valid=false;
+
+
+    for(
+      let attempt=0;
+      attempt<100;
+      attempt++
+    ){
+
+      p=randomSafePoint();
+
+
+      /*
+        Jangan terlalu dekat dengan
+        posisi awal pemain.
+      */
+
+      if(
+        dist(
+          p.x,
+          p.y,
+          safeCenter.x,
+          safeCenter.y
+        )<350
+      ){
+
+        continue;
+
+      }
+
+
+      /*
+        Jangan terlalu dekat dengan
+        batu lain.
+      */
+
+      let tooClose=false;
+
+
+      for(
+        let r of rocks
+      ){
+
+        if(
+          dist(
+            p.x,
+            p.y,
+            r.x,
+            r.y
+          )<90
+        ){
+
+          tooClose=true;
+          break;
+
+        }
+
+      }
+
+
+      if(tooClose)
+        continue;
+
+
+      valid=true;
+      break;
+
+    }
+
+
+    if(!valid)
+      continue;
+
+
+    rocks.push({
+
+      x:p.x,
+      y:p.y,
+
+      radius:
+        24+
+        Math.random()*22,
+
+      rotation:
+        Math.random()*Math.PI,
+
+      size:
+        .8+
+        Math.random()*.7
+
+    });
+
+  }
+
+}
+
+
+/* =================================================
+   ROCK COLLISION
+================================================= */
+
+function hitRock(
+  x,
+  y,
+  radius=0
+){
+
+  if(selectedMap!=="beach")
+    return null;
+
+
+  for(
+    let rock of rocks
+  ){
+
+    if(
+      dist(
+        x,
+        y,
+        rock.x,
+        rock.y
+      )
+      <
+      rock.radius+
+      radius
+    ){
+
+      return rock;
+
+    }
+
+  }
+
+  return null;
+
+}
+
+
+/* =================================================
+   BEACH ROCK DEATH
+================================================= */
+
+function rockDeath(){
+
+  createExplosion(
+    player.x,
+    player.y,
+    "#777777"
+  );
+
+
+  gameOver(
+    "💥 Kamu menabrak batu pantai!"
+  );
+
+}
 
 
 /* =================================================
@@ -1102,6 +1456,7 @@ let player;
 let enemies=[];
 let foods=[];
 let coins=[];
+let specialItems=[];
 let particles=[];
 let decorations=[];
 
@@ -1145,10 +1500,6 @@ function updateBoostCost(){
 
   boostScoreTimer++;
 
-  /*
-    60 frame = kurang lebih 1 detik.
-    HANYA berjalan ketika boost=true.
-  */
 
   if(boostScoreTimer>=60){
 
@@ -1353,6 +1704,7 @@ function randomSafePoint(
         80
       );
 
+
     if(
       wantedZone &&
       getZone(x,y)!==wantedZone
@@ -1362,12 +1714,14 @@ function randomSafePoint(
 
     }
 
+
     return{
       x:x,
       y:y
     };
 
   }
+
 
   return{
     x:WORLD/2,
@@ -1439,6 +1793,7 @@ function createPlayer(){
   let x=WORLD/2;
   let y=WORLD/2;
 
+
   player={
 
     x:x,
@@ -1468,10 +1823,6 @@ function createPlayer(){
   };
 
 
-  /*
-    Body dibuat berdasarkan arah belakang.
-  */
-
   for(
     let i=0;
     i<35;
@@ -1500,6 +1851,7 @@ function createEnemy(i){
 
   let zone=randomZone();
 
+
   for(
     let attempt=0;
     attempt<100;
@@ -1509,13 +1861,19 @@ function createEnemy(i){
     point=
       randomSafePoint(zone);
 
+
     if(
       dist(
         point.x,
         point.y,
         player.x,
         player.y
-      )>650
+      )>650 &&
+      !hitRock(
+        point.x,
+        point.y,
+        30
+      )
     ){
 
       break;
@@ -1649,6 +2007,21 @@ function spawnFood(){
 
   let p=randomSafePoint(zone);
 
+
+  if(
+    selectedMap==="beach" &&
+    hitRock(
+      p.x,
+      p.y,
+      10
+    )
+  ){
+
+    return;
+
+  }
+
+
   foods.push({
 
     x:p.x,
@@ -1677,6 +2050,21 @@ function spawnCoin(){
 
   let p=randomSafePoint(zone);
 
+
+  if(
+    selectedMap==="beach" &&
+    hitRock(
+      p.x,
+      p.y,
+      10
+    )
+  ){
+
+    return;
+
+  }
+
+
   coins.push({
 
     x:p.x,
@@ -1689,6 +2077,386 @@ function spawnCoin(){
     size:7
 
   });
+
+}
+
+
+/* =================================================
+   SPECIAL ITEMS
+================================================= */
+
+
+/*
+  INI PERBAIKAN ITEM SPESIAL.
+
+  Item spesial sekarang mempunyai:
+  - spawn otomatis
+  - posisi aman
+  - tidak muncul di batu
+  - batas jumlah
+  - timer
+  - collision
+*/
+
+
+const SPECIAL_TYPES=[
+
+  {
+    type:"diamond",
+    emoji:"💎",
+    name:"DIAMOND",
+    color:"#00eaff"
+  },
+
+  {
+    type:"lightning",
+    emoji:"⚡",
+    name:"LIGHTNING",
+    color:"#ffff00"
+  },
+
+  {
+    type:"magnet",
+    emoji:"🧲",
+    name:"MEGA MAGNET",
+    color:"#ff4dff"
+  },
+
+  {
+    type:"crown",
+    emoji:"👑",
+    name:"GOLDEN CROWN",
+    color:"#ffd700"
+  }
+
+];
+
+
+let specialSpawnTimer=0;
+
+const SPECIAL_SPAWN_INTERVAL=600;
+
+
+/*
+  600 frame ≈ 10 detik.
+  Maksimal 3 item spesial di arena.
+*/
+
+function spawnSpecialItem(){
+
+  if(
+    specialItems.length>=3
+  ){
+
+    return;
+
+  }
+
+
+  let p=null;
+
+
+  for(
+    let attempt=0;
+    attempt<100;
+    attempt++
+  ){
+
+    let test=
+      randomSafePoint();
+
+
+    if(
+      selectedMap==="beach" &&
+      hitRock(
+        test.x,
+        test.y,
+        25
+      )
+    ){
+
+      continue;
+
+    }
+
+
+    if(
+      dist(
+        test.x,
+        test.y,
+        player.x,
+        player.y
+      )<250
+    ){
+
+      continue;
+
+    }
+
+
+    p=test;
+    break;
+
+  }
+
+
+  if(!p)
+    return;
+
+
+  let type=
+    SPECIAL_TYPES[
+      Math.floor(
+        Math.random()*
+        SPECIAL_TYPES.length
+      )
+    ];
+
+
+  specialItems.push({
+
+    x:p.x,
+    y:p.y,
+
+    type:type.type,
+    emoji:type.emoji,
+    name:type.name,
+    color:type.color,
+
+    size:20,
+
+    life:3600,
+
+    pulse:
+      Math.random()*
+      Math.PI*2
+
+  });
+
+}
+
+
+function updateSpecialItems(){
+
+  specialSpawnTimer++;
+
+
+  /*
+    Item pertama muncul lebih cepat.
+  */
+
+  if(
+    specialItems.length===0 &&
+    gameTime>180
+  ){
+
+    spawnSpecialItem();
+
+    specialSpawnTimer=0;
+
+  }
+
+
+  if(
+    specialSpawnTimer>=
+    SPECIAL_SPAWN_INTERVAL
+  ){
+
+    specialSpawnTimer=0;
+
+    spawnSpecialItem();
+
+  }
+
+
+  for(
+    let i=specialItems.length-1;
+    i>=0;
+    i--
+  ){
+
+    let item=
+      specialItems[i];
+
+
+    item.life--;
+
+    item.pulse+=.08;
+
+
+    if(item.life<=0){
+
+      specialItems.splice(i,1);
+
+    }
+
+  }
+
+}
+
+
+function collectSpecialItem(){
+
+  for(
+    let i=specialItems.length-1;
+    i>=0;
+    i--
+  ){
+
+    let item=
+      specialItems[i];
+
+
+    if(
+      dist(
+        player.x,
+        player.y,
+        item.x,
+        item.y
+      )
+      <
+      player.radius+
+      item.size+
+      8
+    ){
+
+      activateSpecialItem(item);
+
+      specialItems.splice(i,1);
+
+    }
+
+  }
+
+}
+
+
+function activateSpecialItem(item){
+
+  let message="";
+
+
+  if(item.type==="diamond"){
+
+    player.score+=100;
+
+    wallet+=25;
+
+    localStorage.setItem(
+      "dragonCoins",
+      wallet
+    );
+
+
+    message=
+      "💎 DIAMOND! +100 SCORE +25 🪙";
+
+  }
+
+
+  else if(item.type==="lightning"){
+
+    speedTime=
+      Math.max(
+        speedTime,
+        20*60
+      );
+
+
+    message=
+      "⚡ LIGHTNING! SPEED 2× SELAMA 20 DETIK";
+
+  }
+
+
+  else if(item.type==="magnet"){
+
+    magnetTime=
+      Math.max(
+        magnetTime,
+        30*60
+      );
+
+
+    message=
+      "🧲 MEGA MAGNET AKTIF 30 DETIK";
+
+  }
+
+
+  else if(item.type==="crown"){
+
+    player.score+=250;
+
+    wallet+=50;
+
+
+    localStorage.setItem(
+      "dragonCoins",
+      wallet
+    );
+
+
+    message=
+      "👑 GOLDEN CROWN! +250 SCORE +50 🪙";
+
+  }
+
+
+  createExplosion(
+    player.x,
+    player.y,
+    item.color
+  );
+
+
+  showSpecialMessage(message);
+
+}
+
+
+let specialMessageTimer=0;
+
+
+function showSpecialMessage(message){
+
+  const el=
+    document.getElementById(
+      "specialUI"
+    );
+
+
+  el.textContent=
+    message;
+
+
+  el.style.display="block";
+
+
+  specialMessageTimer=180;
+
+}
+
+
+function updateSpecialMessage(){
+
+  if(
+    specialMessageTimer>0
+  ){
+
+    specialMessageTimer--;
+
+    if(
+      specialMessageTimer<=0
+    ){
+
+      document.getElementById(
+        "specialUI"
+      ).style.display="none";
+
+    }
+
+  }
 
 }
 
@@ -1739,6 +2507,7 @@ function hitPlayerBody(
 
     let p=player.body[i];
 
+
     if(
       dist(x,y,p.x,p.y)
       <
@@ -1777,6 +2546,7 @@ function hitEnemyBody(
 
     let p=enemy.body[i];
 
+
     if(
       dist(x,y,p.x,p.y)
       <
@@ -1813,6 +2583,7 @@ function hitOtherEnemyBody(
     if(other===attacker)
       continue;
 
+
     for(
       let j=7;
       j<other.body.length;
@@ -1820,6 +2591,7 @@ function hitOtherEnemyBody(
     ){
 
       let p=other.body[j];
+
 
       if(
         dist(x,y,p.x,p.y)
@@ -1896,6 +2668,17 @@ function updateEnemy(enemy){
       );
 
 
+    let rockDanger=
+      selectedMap==="beach" &&
+      (
+        hitRock(
+          futureX,
+          futureY,
+          enemy.radius+12
+        )!==null
+      );
+
+
     let cliffDanger=
       !isSafe(futureX,futureY) ||
       isNearCliff(
@@ -1905,7 +2688,37 @@ function updateEnemy(enemy){
       );
 
 
-    if(cliffDanger){
+    /*
+      MUSUH MENGHINDARI BATU
+    */
+
+    if(rockDanger){
+
+      let awayAngle=
+        Math.atan2(
+          enemy.y-futureY,
+          enemy.x-futureX
+        );
+
+
+      enemy.targetX=
+        enemy.x+
+        Math.cos(awayAngle)*
+        450;
+
+
+      enemy.targetY=
+        enemy.y+
+        Math.sin(awayAngle)*
+        450;
+
+
+      enemy.avoidTimer=80;
+
+    }
+
+
+    else if(cliffDanger){
 
       let centerAngle=
         Math.atan2(
@@ -1927,6 +2740,7 @@ function updateEnemy(enemy){
       enemy.avoidTimer=50;
 
     }
+
 
     else if(
       enemy.score<
@@ -1959,6 +2773,7 @@ function updateEnemy(enemy){
         sideDistance;
 
     }
+
 
     else{
 
@@ -2008,7 +2823,8 @@ function updateEnemy(enemy){
 
     if(
       distanceToPlayer<950 &&
-      !cliffDanger
+      !cliffDanger &&
+      !rockDanger
     ){
 
       let myIndex=
@@ -2055,6 +2871,11 @@ function updateEnemy(enemy){
       if(
         isSafe(sx,sy) &&
         !hitPlayerBody(
+          sx,
+          sy,
+          enemy.radius
+        ) &&
+        !hitRock(
           sx,
           sy,
           enemy.radius
@@ -2323,6 +3144,10 @@ function updateEnemy(enemy){
   }
 
 
+  /*
+    CEK ARAH DEPAN
+  */
+
   let testX=
     enemy.x+
     Math.cos(enemy.angle)*
@@ -2346,6 +3171,31 @@ function updateEnemy(enemy){
       );
 
     enemy.angle=centerAngle;
+
+  }
+
+
+  /*
+    Kalau musuh sudah terlalu dekat batu,
+    paksa berbelok.
+  */
+
+  if(
+    selectedMap==="beach" &&
+    hitRock(
+      testX,
+      testY,
+      enemy.radius+12
+    )
+  ){
+
+    let escape=
+      enemy.angle+
+      enemy.flankSide*
+      1.5;
+
+
+    enemy.angle=escape;
 
   }
 
@@ -2378,19 +3228,31 @@ function updateEnemy(enemy){
 
 
   /*
-    =================================================
-    PERBAIKAN UTAMA BADAN MUSUH
-    =================================================
+    MUSUH MENABRAK BATU
+  */
 
-    body[0] = kepala
+  if(
+    selectedMap==="beach" &&
+    hitRock(
+      enemy.x,
+      enemy.y,
+      enemy.radius
+    )
+  ){
 
-    body[1] mengikuti body[0]
+    killEnemy(
+      enemy,
+      false,
+      true
+    );
 
-    body[2] mengikuti body[1]
+    return;
 
-    dst.
+  }
 
-    Jadi seluruh badan mengikuti kepala.
+
+  /*
+    BODY FOLLOW FIX
   */
 
   enemy.body[0].x=
@@ -2519,14 +3381,40 @@ function updatePlayer(){
     getPlayerSpeed();
 
 
-  player.x+=
+  let nextX=
+    player.x+
     Math.cos(player.angle)*
     speed;
 
 
-  player.y+=
+  let nextY=
+    player.y+
     Math.sin(player.angle)*
     speed;
+
+
+  /*
+    BATU = MATI
+  */
+
+  if(
+    selectedMap==="beach" &&
+    hitRock(
+      nextX,
+      nextY,
+      player.radius
+    )
+  ){
+
+    rockDeath();
+
+    return;
+
+  }
+
+
+  player.x=nextX;
+  player.y=nextY;
 
 
   /* JURANG */
@@ -2546,20 +3434,7 @@ function updatePlayer(){
 
 
   /*
-    =================================================
-    PERBAIKAN UTAMA BADAN PEMAIN
-    =================================================
-
-    Sebelumnya kode menggunakan:
-
-    body[i]
-
-    sebagai prev dan cur.
-
-    Itu salah.
-
-    Sekarang setiap segmen mengikuti
-    segmen tepat di depannya.
+    BODY FOLLOW
   */
 
   player.body[0].x=
@@ -2722,6 +3597,46 @@ function suckItems(){
 
   }
 
+
+  /*
+    MEGA MAGNET juga menarik
+    item spesial.
+  */
+
+  if(magnetTime>0){
+
+    for(
+      let item of specialItems
+    ){
+
+      let d=
+        dist(
+          player.x,
+          player.y,
+          item.x,
+          item.y
+        );
+
+
+      if(d<range){
+
+        item.x+=
+          (
+            player.x-item.x
+          )*.055;
+
+
+        item.y+=
+          (
+            player.y-item.y
+          )*.055;
+
+      }
+
+    }
+
+  }
+
 }
 
 
@@ -2852,7 +3767,8 @@ function eatFood(){
 
 function killEnemy(
   enemy,
-  cliff=false
+  cliff=false,
+  rock=false
 ){
 
   let index=
@@ -2866,7 +3782,10 @@ function killEnemy(
   createExplosion(
     enemy.x,
     enemy.y,
-    cliff
+    rock
+      ? "#888888"
+      :
+      cliff
       ? "#4b0082"
       : enemy.color
   );
@@ -3259,10 +4178,6 @@ function drawSnake(
     CHARACTER_SKINS[0];
 
 
-  /*
-    BADAN DARI EKOR KE KEPALA
-  */
-
   for(
     let i=snake.body.length-1;
     i>=0;
@@ -3566,9 +4481,15 @@ function createMapDecorations(){
   decorations=[];
 
 
+  let count=
+    selectedMap==="beach"
+    ? 320
+    : 260;
+
+
   for(
     let i=0;
-    i<260;
+    i<count;
     i++
   ){
 
@@ -3576,6 +4497,21 @@ function createMapDecorations(){
 
     let p=
       randomSafePoint(zone);
+
+
+    if(
+      selectedMap==="beach" &&
+      hitRock(
+        p.x,
+        p.y,
+        10
+      )
+    ){
+
+      continue;
+
+    }
+
 
     let type=Math.random();
 
@@ -3601,10 +4537,175 @@ function createMapDecorations(){
 
 
 /* =================================================
+   DRAW BEACH DECORATIONS
+================================================= */
+
+function drawBeachDecorations(){
+
+  /*
+    Pohon kelapa
+  */
+
+  for(
+    let i=0;
+    i<28;
+    i++
+  ){
+
+    let x=
+      350+
+      (
+        (i*787)%4200
+      );
+
+
+    let y=
+      420+
+      (
+        (i*1133)%4100
+      );
+
+
+    if(
+      hitRock(x,y,50)
+    )
+      continue;
+
+
+    if(
+      dist(
+        player.x,
+        player.y,
+        x,
+        y
+      )>1900
+    )
+      continue;
+
+
+    /* batang */
+
+    ctx.strokeStyle="#8b5a2b";
+    ctx.lineWidth=9;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      x,
+      y+38
+    );
+
+    ctx.lineTo(
+      x+8,
+      y-15
+    );
+
+    ctx.stroke();
+
+
+    /* daun */
+
+    ctx.strokeStyle="#176b35";
+    ctx.lineWidth=7;
+
+
+    for(
+      let a=0;
+      a<5;
+      a++
+    ){
+
+      let angle=
+        a*Math.PI*2/5;
+
+
+      ctx.beginPath();
+
+      ctx.moveTo(
+        x+8,
+        y-15
+      );
+
+      ctx.lineTo(
+        x+8+
+        Math.cos(angle)*35,
+
+        y-15+
+        Math.sin(angle)*25
+      );
+
+      ctx.stroke();
+
+    }
+
+  }
+
+
+  /*
+    Kerang
+  */
+
+  for(
+    let i=0;
+    i<90;
+    i++
+  ){
+
+    let x=
+      250+
+      (
+        (i*421)%4500
+      );
+
+
+    let y=
+      300+
+      (
+        (i*733)%4400
+      );
+
+
+    if(
+      dist(
+        player.x,
+        player.y,
+        x,
+        y
+      )>1800
+    )
+      continue;
+
+
+    ctx.font="13px Arial";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+
+    ctx.fillText(
+      i%2
+      ? "🐚"
+      : "🪸",
+      x,
+      y
+    );
+
+  }
+
+}
+
+
+/* =================================================
    DRAW DECORATIONS
 ================================================= */
 
 function drawDecorations(){
+
+  if(selectedMap==="beach"){
+
+    drawBeachDecorations();
+
+  }
+
 
   for(
     let d of decorations
@@ -3619,6 +4720,78 @@ function drawDecorations(){
       )>1800
     )
       continue;
+
+
+    if(
+      selectedMap==="beach"
+    ){
+
+      /*
+        Pantai menggunakan
+        pasir dan tanaman kecil.
+      */
+
+      if(d.type<.45){
+
+        ctx.fillStyle="#d9b85b";
+
+
+        ctx.beginPath();
+
+
+        ctx.arc(
+          d.x,
+          d.y,
+          d.size*.55,
+          0,
+          Math.PI*2
+        );
+
+
+        ctx.fill();
+
+      }
+      else{
+
+        ctx.strokeStyle="#a88738";
+        ctx.lineWidth=2;
+
+
+        ctx.beginPath();
+
+
+        ctx.moveTo(
+          d.x,
+          d.y+d.size
+        );
+
+
+        ctx.lineTo(
+          d.x-3,
+          d.y-d.size
+        );
+
+
+        ctx.moveTo(
+          d.x+3,
+          d.y+d.size
+        );
+
+
+        ctx.lineTo(
+          d.x+5,
+          d.y-d.size*.5
+        );
+
+
+        ctx.stroke();
+
+      }
+
+
+      continue;
+
+    }
 
 
     if(d.type<.45){
@@ -3751,12 +4924,20 @@ function drawZones(){
 
 
       ctx.fillStyle=
+        selectedMap==="beach"
+        ?
+        "rgba(255,170,50,.10)"
+        :
         "rgba(30,130,50,.12)";
 
       ctx.fill();
 
 
       ctx.strokeStyle=
+        selectedMap==="beach"
+        ?
+        "rgba(255,220,100,.12)"
+        :
         "rgba(100,255,120,.12)";
 
       ctx.lineWidth=3;
@@ -3764,6 +4945,10 @@ function drawZones(){
 
 
       ctx.fillStyle=
+        selectedMap==="beach"
+        ?
+        "rgba(255,240,160,.55)"
+        :
         "rgba(170,255,170,.55)";
 
       ctx.font=
@@ -3802,6 +4987,10 @@ function drawZones(){
 
 
       ctx.fillStyle=
+        selectedMap==="beach"
+        ?
+        "rgba(255,255,255,.08)"
+        :
         "rgba(30,30,30,.22)";
 
       ctx.fill();
@@ -3872,10 +5061,151 @@ function drawZones(){
 
 
 /* =================================================
-   DRAW CLIFF
+   DRAW CLIFF / BEACH
 ================================================= */
 
 function drawCliff(){
+
+  /*
+    LAUT PANTAI
+  */
+
+  if(selectedMap==="beach"){
+
+    ctx.fillStyle="#126d91";
+
+
+    ctx.fillRect(
+      0,
+      0,
+      WORLD,
+      WORLD
+    );
+
+
+    /*
+      Air bergelombang
+    */
+
+    ctx.strokeStyle=
+      "rgba(150,235,255,.18)";
+
+    ctx.lineWidth=3;
+
+
+    for(
+      let y=30;
+      y<WORLD;
+      y+=70
+    ){
+
+      for(
+        let x=30;
+        x<WORLD;
+        x+=130
+      ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+          x,
+          y
+        );
+
+        ctx.quadraticCurveTo(
+          x+30,
+          y-12,
+          x+60,
+          y
+        );
+
+        ctx.stroke();
+
+      }
+
+    }
+
+
+    /*
+      Pasir aman
+    */
+
+    ctx.fillStyle="#e1c477";
+
+
+    ctx.fillRect(
+      CLIFF,
+      CLIFF,
+      WORLD-CLIFF*2,
+      WORLD-CLIFF*2
+    );
+
+
+    /*
+      gradasi pasir
+    */
+
+    ctx.fillStyle=
+      "rgba(255,238,170,.18)";
+
+
+    ctx.fillRect(
+      CLIFF+20,
+      CLIFF+20,
+      WORLD-CLIFF*2-40,
+      WORLD-CLIFF*2-40
+    );
+
+
+    /*
+      batas laut
+    */
+
+    ctx.strokeStyle=
+      "rgba(255,255,255,.65)";
+
+    ctx.lineWidth=12;
+
+
+    ctx.strokeRect(
+      CLIFF,
+      CLIFF,
+      WORLD-CLIFF*2,
+      WORLD-CLIFF*2
+    );
+
+
+    ctx.fillStyle=
+      "rgba(255,255,255,.8)";
+
+    ctx.font=
+      "bold 23px Arial";
+
+    ctx.textAlign="center";
+
+
+    ctx.fillText(
+      "🌊 LAUT",
+      WORLD/2,
+      85
+    );
+
+
+    ctx.fillText(
+      "🌊 LAUT",
+      WORLD/2,
+      WORLD-55
+    );
+
+
+    return;
+
+  }
+
+
+  /*
+    MAP HIJAU LAMA
+  */
 
   ctx.fillStyle="#09050d";
 
@@ -4068,6 +5398,307 @@ function drawCliff(){
 
 
 /* =================================================
+   DRAW ROCKS
+================================================= */
+
+function drawRocks(){
+
+  if(selectedMap!=="beach")
+    return;
+
+
+  for(
+    let rock of rocks
+  ){
+
+    if(
+      dist(
+        player.x,
+        player.y,
+        rock.x,
+        rock.y
+      )>1800
+    )
+      continue;
+
+
+    ctx.save();
+
+
+    ctx.translate(
+      rock.x,
+      rock.y
+    );
+
+
+    ctx.rotate(
+      rock.rotation
+    );
+
+
+    /*
+      Bayangan
+    */
+
+    ctx.fillStyle=
+      "rgba(70,50,20,.28)";
+
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+      4,
+      7,
+      rock.radius*1.05,
+      rock.radius*.6,
+      0,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /*
+      Batu utama
+    */
+
+    ctx.fillStyle="#68645b";
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      -rock.radius*.8,
+      rock.radius*.25
+    );
+
+    ctx.lineTo(
+      -rock.radius*.55,
+      -rock.radius*.55
+    );
+
+    ctx.lineTo(
+      0,
+      -rock.radius
+    );
+
+    ctx.lineTo(
+      rock.radius*.75,
+      -rock.radius*.45
+    );
+
+    ctx.lineTo(
+      rock.radius,
+      rock.radius*.35
+    );
+
+    ctx.lineTo(
+      rock.radius*.35,
+      rock.radius*.8
+    );
+
+    ctx.lineTo(
+      -rock.radius*.55,
+      rock.radius*.75
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    /*
+      sisi terang
+    */
+
+    ctx.fillStyle="#969187";
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      -rock.radius*.55,
+      -rock.radius*.55
+    );
+
+    ctx.lineTo(
+      0,
+      -rock.radius
+    );
+
+    ctx.lineTo(
+      rock.radius*.75,
+      -rock.radius*.45
+    );
+
+    ctx.lineTo(
+      0,
+      -rock.radius*.25
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    /*
+      tanda bahaya kecil
+    */
+
+    ctx.strokeStyle=
+      "rgba(255,200,50,.5)";
+
+    ctx.lineWidth=2;
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+      0,
+      0,
+      rock.radius+5,
+      0,
+      Math.PI*2
+    );
+
+    ctx.stroke();
+
+
+    ctx.restore();
+
+  }
+
+}
+
+
+/* =================================================
+   DRAW SPECIAL ITEMS
+================================================= */
+
+function drawSpecialItems(){
+
+  for(
+    let item of specialItems
+  ){
+
+    if(
+      dist(
+        player.x,
+        player.y,
+        item.x,
+        item.y
+      )>1800
+    )
+      continue;
+
+
+    let pulse=
+      Math.sin(item.pulse)*4;
+
+
+    ctx.save();
+
+
+    /*
+      glow
+    */
+
+    ctx.shadowColor=
+      item.color;
+
+    ctx.shadowBlur=
+      20+
+      pulse;
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+      item.x,
+      item.y,
+      item.size+
+      pulse,
+      0,
+      Math.PI*2
+    );
+
+
+    ctx.fillStyle=
+      "rgba(255,255,255,.12)";
+
+    ctx.fill();
+
+
+    ctx.shadowBlur=0;
+
+
+    ctx.font=
+      `${item.size*1.7}px Arial`;
+
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+
+
+    ctx.fillText(
+      item.emoji,
+      item.x,
+      item.y
+    );
+
+
+    /*
+      lingkaran item
+    */
+
+    ctx.strokeStyle=
+      item.color;
+
+    ctx.lineWidth=2;
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+      item.x,
+      item.y,
+      item.size+
+      7+
+      pulse,
+      0,
+      Math.PI*2
+    );
+
+    ctx.stroke();
+
+
+    /*
+      nama item
+    */
+
+    ctx.font=
+      "bold 9px Arial";
+
+    ctx.fillStyle="#fff";
+
+
+    ctx.fillText(
+      item.name,
+      item.x,
+      item.y-
+      item.size-
+      13
+    );
+
+
+    ctx.restore();
+
+  }
+
+}
+
+
+/* =================================================
    DRAW WORLD
 ================================================= */
 
@@ -4114,57 +5745,63 @@ function drawWorld(){
 
   drawDecorations();
 
+  drawRocks();
+
 
   /* GRID */
 
-  ctx.strokeStyle=
-    "rgba(255,255,255,.025)";
+  if(selectedMap==="green"){
 
-  ctx.lineWidth=1;
+    ctx.strokeStyle=
+      "rgba(255,255,255,.025)";
 
-
-  for(
-    let x=CLIFF;
-    x<=WORLD-CLIFF;
-    x+=100
-  ){
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-      x,
-      CLIFF
-    );
-
-    ctx.lineTo(
-      x,
-      WORLD-CLIFF
-    );
-
-    ctx.stroke();
-
-  }
+    ctx.lineWidth=1;
 
 
-  for(
-    let y=CLIFF;
-    y<=WORLD-CLIFF;
-    y+=100
-  ){
+    for(
+      let x=CLIFF;
+      x<=WORLD-CLIFF;
+      x+=100
+    ){
 
-    ctx.beginPath();
+      ctx.beginPath();
 
-    ctx.moveTo(
-      CLIFF,
-      y
-    );
+      ctx.moveTo(
+        x,
+        CLIFF
+      );
 
-    ctx.lineTo(
-      WORLD-CLIFF,
-      y
-    );
+      ctx.lineTo(
+        x,
+        WORLD-CLIFF
+      );
 
-    ctx.stroke();
+      ctx.stroke();
+
+    }
+
+
+    for(
+      let y=CLIFF;
+      y<=WORLD-CLIFF;
+      y+=100
+    ){
+
+      ctx.beginPath();
+
+      ctx.moveTo(
+        CLIFF,
+        y
+      );
+
+      ctx.lineTo(
+        WORLD-CLIFF,
+        y
+      );
+
+      ctx.stroke();
+
+    }
 
   }
 
@@ -4233,6 +5870,13 @@ function drawWorld(){
     );
 
   }
+
+
+  /*
+    ITEM SPESIAL
+  */
+
+  drawSpecialItems();
 
 
   /* ENEMIES */
@@ -4357,29 +6001,58 @@ function drawMiniMap(){
   );
 
 
-  miniCtx.fillStyle="#24132e";
+  if(selectedMap==="beach"){
+
+    miniCtx.fillStyle="#126d91";
+
+    miniCtx.fillRect(
+      0,
+      0,
+      mw,
+      mh
+    );
 
 
-  miniCtx.fillRect(
-    0,
-    0,
-    mw,
-    mh
-  );
+    miniCtx.fillStyle="#e1c477";
+
+    miniCtx.fillRect(
+      CLIFF*(mw/WORLD),
+      CLIFF*(mh/WORLD),
+      (WORLD-CLIFF*2)*(mw/WORLD),
+      (WORLD-CLIFF*2)*(mh/WORLD)
+    );
+
+  }
+  else{
+
+    miniCtx.fillStyle="#24132e";
+
+
+    miniCtx.fillRect(
+      0,
+      0,
+      mw,
+      mh
+    );
+
+
+    let s=mw/WORLD;
+
+
+    miniCtx.fillStyle="#17351d";
+
+
+    miniCtx.fillRect(
+      CLIFF*s,
+      CLIFF*s,
+      (WORLD-CLIFF*2)*s,
+      (WORLD-CLIFF*2)*s
+    );
+
+  }
 
 
   let s=mw/WORLD;
-
-
-  miniCtx.fillStyle="#17351d";
-
-
-  miniCtx.fillRect(
-    CLIFF*s,
-    CLIFF*s,
-    (WORLD-CLIFF*2)*s,
-    (WORLD-CLIFF*2)*s
-  );
 
 
   for(
@@ -4401,6 +6074,10 @@ function drawMiniMap(){
     if(z.type==="ramai"){
 
       miniCtx.fillStyle=
+        selectedMap==="beach"
+        ?
+        "rgba(255,190,50,.25)"
+        :
         "rgba(50,180,70,.35)";
 
     }
@@ -4423,6 +6100,34 @@ function drawMiniMap(){
   }
 
 
+  /* ROCKS */
+
+  if(selectedMap==="beach"){
+
+    miniCtx.fillStyle="#555";
+
+
+    for(
+      let rock of rocks
+    ){
+
+      miniCtx.beginPath();
+
+      miniCtx.arc(
+        rock.x*s,
+        rock.y*s,
+        2.5,
+        0,
+        Math.PI*2
+      );
+
+      miniCtx.fill();
+
+    }
+
+  }
+
+
   /* FOOD */
 
   miniCtx.fillStyle="#ffd166";
@@ -4438,6 +6143,33 @@ function drawMiniMap(){
       2,
       2
     );
+
+  }
+
+
+  /* SPECIAL ITEMS */
+
+  for(
+    let item of specialItems
+  ){
+
+    miniCtx.beginPath();
+
+
+    miniCtx.arc(
+      item.x*s,
+      item.y*s,
+      3,
+      0,
+      Math.PI*2
+    );
+
+
+    miniCtx.fillStyle=
+      item.color;
+
+
+    miniCtx.fill();
 
   }
 
@@ -4625,6 +6357,25 @@ function maintainWorld(){
 
   }
 
+
+  /*
+    Pastikan item spesial selalu
+    tersedia setelah timer bekerja.
+  */
+
+  if(
+    running &&
+    gameTime>180 &&
+    specialItems.length===0 &&
+    specialSpawnTimer>120
+  ){
+
+    spawnSpecialItem();
+
+    specialSpawnTimer=0;
+
+  }
+
 }
 
 
@@ -4693,11 +6444,28 @@ function updateUI(){
       "🌿 ZONA SEDANG";
 
 
+  let mapText=
+    selectedMap==="beach"
+    ?
+      "🏖️ PASIR PANTAI"
+    :
+      "🌿 MAP HIJAU";
+
+
   document.getElementById(
     "zoneInfo"
   ).textContent=
+    mapText+
+    " • "+
     zoneText+
-    " • ⚠ Jangan masuk jurang";
+    " • ⚠ Jangan menabrak "+
+    (
+      selectedMap==="beach"
+      ?
+      "batu!"
+      :
+      "jurang!"
+    );
 
 }
 
@@ -4715,13 +6483,7 @@ function loop(){
   gameTime++;
 
 
-  /*
-    BOOST BERKURANG 5 SCORE
-    HANYA SAAT BOOST AKTIF.
-  */
-
   updateBoostCost();
-
 
   updatePlayer();
 
@@ -4749,6 +6511,8 @@ function loop(){
 
   eatFood();
 
+  collectSpecialItem();
+
   checkCollisions();
 
 
@@ -4759,6 +6523,10 @@ function loop(){
   updateParticles();
 
   updatePowers();
+
+  updateSpecialItems();
+
+  updateSpecialMessage();
 
   maintainWorld();
 
@@ -4799,6 +6567,11 @@ function startGame(){
 
 
   document.getElementById(
+    "mapShop"
+  ).style.display="none";
+
+
+  document.getElementById(
     "shop"
   ).style.display="none";
 
@@ -4824,15 +6597,35 @@ function startGame(){
 
   foods=[];
   coins=[];
+  specialItems=[];
   enemies=[];
   particles=[];
+  rocks=[];
+
+
+  specialSpawnTimer=0;
+  specialMessageTimer=0;
+
+
+  document.getElementById(
+    "specialUI"
+  ).style.display="none";
 
 
   resetEnemyNames();
 
-  createMapDecorations();
 
   createPlayer();
+
+
+  /*
+    Batu dibuat setelah player
+    supaya posisi awal aman.
+  */
+
+  createBeachRocks();
+
+  createMapDecorations();
 
 
   for(
@@ -4869,6 +6662,12 @@ function startGame(){
 
   }
 
+
+  /*
+    Item spesial pertama
+    muncul sekitar beberapa detik
+    setelah permainan berjalan.
+  */
 
   updateUI();
 
@@ -4912,6 +6711,17 @@ function gameOver(
     <b>${player.name}</b><br><br>
 
     ${deathReason}<br><br>
+
+    Map:
+    <b>
+      ${
+        selectedMap==="beach"
+        ?
+        "🏖️ Pasir Pantai"
+        :
+        "🌿 Map Hijau"
+      }
+    </b><br>
 
     Karakter:
     <b>${player.skin.name}</b><br>
@@ -5342,6 +7152,77 @@ function selectSkin(id){
 
 
 /* =================================================
+   MAP SHOP
+================================================= */
+
+function openMapShop(){
+
+  updateMapCards();
+
+
+  document.getElementById(
+    "mapShop"
+  ).style.display="flex";
+
+}
+
+
+function closeMapShop(){
+
+  document.getElementById(
+    "mapShop"
+  ).style.display="none";
+
+}
+
+
+function updateMapCards(){
+
+  document.getElementById(
+    "greenMapCard"
+  ).classList.toggle(
+    "active",
+    selectedMap==="green"
+  );
+
+
+  document.getElementById(
+    "beachMapCard"
+  ).classList.toggle(
+    "active",
+    selectedMap==="beach"
+  );
+
+}
+
+
+function selectMap(id){
+
+  if(!MAPS[id])
+    return;
+
+
+  selectedMap=id;
+
+
+  localStorage.setItem(
+    "dragonSelectedMap",
+    selectedMap
+  );
+
+
+  document.getElementById(
+    "selectedMap"
+  ).textContent=
+    MAPS[selectedMap].name;
+
+
+  updateMapCards();
+
+}
+
+
+/* =================================================
    PREVIEW
 ================================================= */
 
@@ -5360,6 +7241,12 @@ function updateCharacterPreview(){
     "selectedCharacter"
   ).textContent=
     skin.name;
+
+
+  document.getElementById(
+    "selectedMap"
+  ).textContent=
+    MAPS[selectedMap].name;
 
 }
 
