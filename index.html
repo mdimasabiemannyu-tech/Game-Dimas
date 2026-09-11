@@ -6,275 +6,215 @@
 <title>Dragon Snake Battle</title>
 
 <style>
-*{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
 html,body{
-  margin:0;
-  padding:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  font-family:Arial,Helvetica,sans-serif;
-  background:#07111d;
-  color:white;
+margin:0;padding:0;width:100%;height:100%;
+overflow:hidden;background:#06111d;color:white;
+font-family:Arial,sans-serif
 }
 
 canvas{
-  position:fixed;
-  inset:0;
-  width:100%;
-  height:100%;
-  display:block;
-  touch-action:none;
+position:fixed;inset:0;width:100%;height:100%;
+display:block;touch-action:none
 }
 
-#menu{
-  position:fixed;
-  inset:0;
-  z-index:20;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  background:
-    radial-gradient(circle at 50% 35%,#244e72 0,#102638 35%,#050b12 100%);
+button,input{font-family:inherit}
+
+#menu,#shop,#gameOver{
+position:fixed;inset:0;z-index:20;
+display:flex;align-items:center;justify-content:center;
+padding:18px;
+background:radial-gradient(circle,#173b58,#06111d 70%);
 }
 
-.menuBox{
-  width:min(430px,100%);
-  padding:28px 22px;
-  border-radius:28px;
-  background:rgba(8,18,29,.94);
-  border:2px solid rgba(255,255,255,.15);
-  box-shadow:0 20px 60px #000;
-  text-align:center;
+.box{
+width:min(430px,100%);
+background:rgba(5,15,25,.95);
+border:2px solid rgba(255,255,255,.12);
+border-radius:25px;
+padding:25px;
+text-align:center;
+box-shadow:0 20px 60px #000;
 }
 
 .logo{
-  font-size:42px;
-  font-weight:900;
-  margin-bottom:4px;
-  text-shadow:0 4px 15px #000;
+font-size:38px;font-weight:900;margin-bottom:5px
 }
 
-.logo span{
-  color:#ffd43b;
-}
+.logo span{color:#ffd43b}
 
-.sub{
-  color:#a9bac9;
-  margin-bottom:22px;
-}
+.sub{color:#9fb1c1;margin-bottom:20px}
 
 input{
-  width:100%;
-  padding:15px;
-  border:0;
-  border-radius:14px;
-  margin-bottom:12px;
-  font-size:17px;
-  outline:none;
+width:100%;padding:14px;border:0;border-radius:12px;
+font-size:17px;margin-bottom:12px
 }
 
-.startBtn{
-  width:100%;
-  padding:16px;
-  border:0;
-  border-radius:15px;
-  background:linear-gradient(135deg,#00e676,#00a85a);
-  color:#002b18;
-  font-size:19px;
-  font-weight:900;
-  cursor:pointer;
+.mainBtn,.shopBtn{
+width:100%;padding:15px;border:0;border-radius:13px;
+font-size:18px;font-weight:bold;cursor:pointer
 }
+
+.mainBtn{background:#00e676;color:#002b17}
+.shopBtn{background:#ffd43b;color:#302400;margin-top:10px}
 
 .info{
-  margin-top:18px;
-  color:#91a4b5;
-  font-size:13px;
-  line-height:1.6;
+font-size:13px;line-height:1.65;color:#93a7b7;margin-top:15px
 }
 
 #gameUI{
-  position:fixed;
-  inset:0;
-  z-index:5;
-  pointer-events:none;
+position:fixed;inset:0;z-index:5;pointer-events:none
 }
 
 .top{
-  position:absolute;
-  top:12px;
-  left:12px;
-  right:12px;
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:10px;
+position:absolute;top:10px;left:10px;right:10px;
+display:flex;justify-content:space-between;gap:10px
 }
 
-.stat{
-  background:rgba(4,13,22,.82);
-  border:1px solid rgba(255,255,255,.15);
-  border-radius:14px;
-  padding:8px 12px;
-  backdrop-filter:blur(8px);
-  box-shadow:0 5px 20px rgba(0,0,0,.3);
+.stat,.rank,.coinUI{
+background:rgba(3,12,21,.82);
+border:1px solid rgba(255,255,255,.14);
+border-radius:14px;padding:9px 12px;
+backdrop-filter:blur(7px)
 }
 
-.stat b{
-  color:#ffd43b;
+.stat{font-size:13px;line-height:1.5}
+.stat b{color:#ffd43b}
+
+.rank{width:165px;font-size:11px}
+.rankTitle{color:#ffd43b;font-weight:bold;margin-bottom:5px}
+.rankRow{display:flex;justify-content:space-between;margin:3px 0}
+
+.coinUI{
+position:absolute;
+top:125px;
+left:10px;
+color:#ffd43b;
+font-weight:bold
 }
 
-.rank{
-  min-width:150px;
-  max-width:190px;
-  background:rgba(4,13,22,.82);
-  border-radius:15px;
-  padding:10px;
-  font-size:12px;
+#powerUI{
+position:absolute;
+top:160px;
+left:10px;
+font-size:12px;
+line-height:1.5
 }
 
-.rankTitle{
-  font-size:14px;
-  font-weight:bold;
-  color:#ffd43b;
-  margin-bottom:5px;
-}
-
-.rankRow{
-  display:flex;
-  justify-content:space-between;
-  margin:3px 0;
-  color:#d8e2ea;
+.power{
+background:rgba(0,0,0,.65);
+border-radius:9px;
+padding:5px 8px;
+margin-top:3px
 }
 
 #message{
-  position:absolute;
-  top:42%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  text-align:center;
-  font-size:30px;
-  font-weight:900;
-  text-shadow:0 4px 15px #000;
-  opacity:0;
-  transition:.3s;
-  white-space:nowrap;
+position:absolute;
+top:42%;left:50%;
+transform:translate(-50%,-50%);
+font-size:27px;font-weight:900;
+text-shadow:0 4px 15px #000;
+opacity:0;transition:.2s;
+white-space:nowrap
 }
 
-#message.show{
-  opacity:1;
-}
-
-#boostBtn{
-  position:absolute;
-  right:20px;
-  bottom:25px;
-  width:82px;
-  height:82px;
-  border-radius:50%;
-  border:4px solid rgba(255,255,255,.7);
-  background:linear-gradient(#ffca28,#ff6d00);
-  color:white;
-  font-size:13px;
-  font-weight:900;
-  box-shadow:0 7px 25px rgba(255,110,0,.5);
-  pointer-events:auto;
-  touch-action:none;
-}
-
-#boostBtn:active{
-  transform:scale(.93);
-}
+#message.show{opacity:1}
 
 #joystick{
-  position:absolute;
-  left:22px;
-  bottom:25px;
-  width:125px;
-  height:125px;
-  border-radius:50%;
-  background:rgba(255,255,255,.10);
-  border:2px solid rgba(255,255,255,.18);
-  pointer-events:auto;
-  touch-action:none;
+position:absolute;
+bottom:25px;left:22px;
+width:125px;height:125px;border-radius:50%;
+background:rgba(255,255,255,.1);
+border:2px solid rgba(255,255,255,.2);
+pointer-events:auto;touch-action:none
 }
 
 #stick{
-  position:absolute;
-  left:50%;
-  top:50%;
-  width:54px;
-  height:54px;
-  margin-left:-27px;
-  margin-top:-27px;
-  border-radius:50%;
-  background:rgba(255,255,255,.35);
-  border:2px solid rgba(255,255,255,.5);
+position:absolute;left:50%;top:50%;
+width:54px;height:54px;
+margin:-27px;border-radius:50%;
+background:rgba(255,255,255,.35)
+}
+
+#boostBtn{
+position:absolute;right:20px;bottom:25px;
+width:82px;height:82px;border-radius:50%;
+border:3px solid white;
+background:linear-gradient(#ffca28,#ff6d00);
+color:white;font-weight:bold;
+pointer-events:auto;touch-action:none
+}
+
+#shop{
+display:none;z-index:50
+}
+
+.shopTitle{
+font-size:30px;font-weight:900;color:#ffd43b
+}
+
+.balance{
+margin:10px 0 18px;
+font-size:18px
+}
+
+.item{
+display:flex;align-items:center;
+justify-content:space-between;
+background:#102538;
+border-radius:14px;
+padding:11px;margin:8px 0;
+text-align:left
+}
+
+.itemInfo{
+display:flex;gap:10px;align-items:center
+}
+
+.itemIcon{font-size:30px}
+.itemName{font-weight:bold}
+.itemDesc{font-size:11px;color:#9fb1c1;margin-top:3px}
+
+.buy{
+border:0;border-radius:10px;
+padding:9px 12px;
+background:#00e676;
+font-weight:bold
+}
+
+.close{
+width:100%;padding:12px;
+border:0;border-radius:12px;
+background:#374b5c;color:white;
+margin-top:12px;font-weight:bold
 }
 
 #gameOver{
-  position:fixed;
-  inset:0;
-  z-index:30;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  background:rgba(0,0,0,.72);
-}
-
-.overBox{
-  width:min(390px,100%);
-  text-align:center;
-  background:#0d1c2b;
-  border:2px solid rgba(255,255,255,.15);
-  border-radius:25px;
-  padding:28px;
-  box-shadow:0 20px 60px #000;
+display:none;z-index:60
 }
 
 .overTitle{
-  font-size:38px;
-  font-weight:900;
+font-size:38px;font-weight:900
 }
 
 .finalScore{
-  font-size:24px;
-  margin:15px 0;
-  color:#ffd43b;
+font-size:24px;color:#ffd43b;margin:15px
 }
 
-.again{
-  width:100%;
-  padding:15px;
-  border:0;
-  border-radius:14px;
-  background:#00e676;
-  font-size:18px;
-  font-weight:bold;
-}
-
-@media(max-width:600px){
-  .logo{font-size:35px}
-  .rank{min-width:125px;font-size:11px}
-  .stat{font-size:13px}
-  #message{font-size:25px}
+#shopButton{
+position:absolute;
+top:125px;right:10px;
+border:0;border-radius:12px;
+background:#ffd43b;
+padding:9px 12px;
+font-weight:bold;
+pointer-events:auto
 }
 
 @media(min-width:700px){
-  #joystick{
-    display:none;
-  }
-
-  #boostBtn{
-    bottom:30px;
-    right:30px;
-  }
+#joystick{display:none}
+#boostBtn{right:30px;bottom:30px}
 }
 </style>
 </head>
@@ -283,136 +223,184 @@ input{
 
 <canvas id="gameCanvas"></canvas>
 
+<!-- MENU -->
 <div id="menu">
+<div class="box">
 
-  <div class="menuBox">
+<div class="logo">🐉 DRAGON <span>SNAKE</span></div>
+<div class="sub">⚔️ Battle Arena</div>
 
-    <div class="logo">
-      🐉 DRAGON <span>SNAKE</span>
-    </div>
+<input id="playerName" maxlength="15"
+value="Dimas" placeholder="Nama pemain">
 
-    <div class="sub">
-      ⚔️ Battle Arena • Snake.io Style
-    </div>
+<button class="mainBtn" onclick="startGame()">
+🚀 MULAI BATTLE
+</button>
 
-    <input id="playerName"
-           maxlength="15"
-           placeholder="Nama pemain"
-           value="Dimas">
-
-    <button class="startBtn" onclick="startGame()">
-      🚀 MULAI BATTLE
-    </button>
-
-    <div class="info">
-      🍰 Makan kue untuk bertambah besar<br>
-      💀 Kepala kena badan = MATI!<br>
-      ⚔️ Adu kepala berdasarkan poin<br>
-      🤖 Musuh semakin sulit setiap level<br>
-      🏆 Kalahkan ular lain dan jadi nomor 1!<br>
-      📱 HP: gunakan joystick • PC: arahkan mouse
-    </div>
-
-  </div>
-
+<div class="info">
+🍰 Kue akan tertarik ke kepala ular<br>
+🧲 Magnet = jangkauan hisap besar<br>
+🔍 Kaca pembesar = arena terlihat lebih luas<br>
+✖️5 Bonus = nilai makanan/koin 5×<br>
+⚡2× Speed = ular bergerak 2× lebih cepat<br>
+🪙 Koin dapat digunakan membeli item<br>
+💀 Kepala menabrak badan = mati
 </div>
 
+</div>
+</div>
+
+<!-- SHOP -->
+<div id="shop">
+<div class="box">
+
+<div class="shopTitle">🛒 TOKO ITEM</div>
+
+<div class="balance">
+🪙 Koin: <b id="shopCoins">0</b>
+</div>
+
+<div class="item">
+<div class="itemInfo">
+<div class="itemIcon">🧲</div>
+<div>
+<div class="itemName">MAGNET</div>
+<div class="itemDesc">Hisap makanan & koin lebih jauh</div>
+</div>
+</div>
+<button class="buy" onclick="buyItem('magnet',50)">50 🪙</button>
+</div>
+
+<div class="item">
+<div class="itemInfo">
+<div class="itemIcon">🔍</div>
+<div>
+<div class="itemName">KACA PEMBESAR</div>
+<div class="itemDesc">Layar arena menjadi lebih luas</div>
+</div>
+</div>
+<button class="buy" onclick="buyItem('zoom',80)">80 🪙</button>
+</div>
+
+<div class="item">
+<div class="itemInfo">
+<div class="itemIcon">✖️5</div>
+<div>
+<div class="itemName">BONUS 5×</div>
+<div class="itemDesc">Nilai makanan & koin 5×</div>
+</div>
+</div>
+<button class="buy" onclick="buyItem('bonus',100)">100 🪙</button>
+</div>
+
+<div class="item">
+<div class="itemInfo">
+<div class="itemIcon">⚡</div>
+<div>
+<div class="itemName">SPEED 2×</div>
+<div class="itemDesc">Kecepatan ular 2×</div>
+</div>
+</div>
+<button class="buy" onclick="buyItem('speed',100)">100 🪙</button>
+</div>
+
+<button class="close" onclick="closeShop()">
+TUTUP TOKO
+</button>
+
+</div>
+</div>
+
+<!-- GAME UI -->
 <div id="gameUI">
 
-  <div class="top">
+<div class="top">
 
-    <div class="stat">
-      🐉 <span id="nameUI">Dimas</span><br>
-      ⭐ <b id="scoreUI">100</b> Poin<br>
-      📏 <b id="lengthUI">10</b> Panjang<br>
-      🏆 Lv <b id="levelUI">1</b>
-    </div>
+<div class="stat">
+🐉 <span id="nameUI">Dimas</span><br>
+⭐ <b id="scoreUI">100</b> Poin<br>
+📏 <b id="lengthUI">12</b> Panjang<br>
+🏆 Level <b id="levelUI">1</b>
+</div>
 
-    <div class="rank">
-
-      <div class="rankTitle">
-        🏆 LEADERBOARD
-      </div>
-
-      <div id="leaderboard"></div>
-
-    </div>
-
-  </div>
-
-  <div id="message"></div>
-
-  <div id="joystick">
-    <div id="stick"></div>
-  </div>
-
-  <button id="boostBtn">
-    ⚡<br>BOOST
-  </button>
+<div class="rank">
+<div class="rankTitle">🏆 LEADERBOARD</div>
+<div id="leaderboard"></div>
+</div>
 
 </div>
 
+<div class="coinUI">
+🪙 <span id="coinUI">0</span>
+</div>
+
+<button id="shopButton" onclick="openShop()">
+🛒 TOKO
+</button>
+
+<div id="powerUI"></div>
+
+<div id="message"></div>
+
+<div id="joystick">
+<div id="stick"></div>
+</div>
+
+<button id="boostBtn">
+⚡<br>BOOST
+</button>
+
+</div>
+
+<!-- GAME OVER -->
 <div id="gameOver">
+<div class="box">
 
-  <div class="overBox">
+<div class="overTitle">💀 KALAH!</div>
 
-    <div class="overTitle">
-      💀 KALAH!
-    </div>
+<div id="overText">
+Permainan selesai
+</div>
 
-    <div id="overText">
-      Permainan selesai
-    </div>
+<div class="finalScore">
+⭐ <span id="finalScore">0</span>
+</div>
 
-    <div class="finalScore">
-      ⭐ <span id="finalScore">0</span> Poin
-    </div>
+<button class="mainBtn" onclick="restartGame()">
+🔄 MAIN LAGI
+</button>
 
-    <button class="again" onclick="restartGame()">
-      🔄 MAIN LAGI
-    </button>
-
-  </div>
-
+</div>
 </div>
 
 <script>
 
-const canvas =
-  document.getElementById("gameCanvas");
+const canvas=document.getElementById("gameCanvas");
+const ctx=canvas.getContext("2d");
 
-const ctx =
-  canvas.getContext("2d");
-
-let W=0;
-let H=0;
+let W,H;
 
 function resize(){
+W=innerWidth;
+H=innerHeight;
 
-  W=window.innerWidth;
-  H=window.innerHeight;
+let dpr=Math.min(devicePixelRatio||1,2);
 
-  const dpr=
-    Math.min(window.devicePixelRatio||1,2);
+canvas.width=W*dpr;
+canvas.height=H*dpr;
 
-  canvas.width=W*dpr;
-  canvas.height=H*dpr;
+canvas.style.width=W+"px";
+canvas.style.height=H+"px";
 
-  canvas.style.width=W+"px";
-  canvas.style.height=H+"px";
-
-  ctx.setTransform(
-    dpr,0,0,dpr,0,0
-  );
+ctx.setTransform(dpr,0,0,dpr,0,0);
 }
 
 resize();
-
-window.addEventListener("resize",resize);
+addEventListener("resize",resize);
 
 
 /* =========================
-   GAME
+   DATA
 ========================= */
 
 let player;
@@ -421,62 +409,57 @@ let foods=[];
 let coins=[];
 
 let running=false;
-
 let level=1;
 let kills=0;
 
-let mouseX=
-  window.innerWidth/2;
-
-let mouseY=
-  window.innerHeight/2;
-
-let joystickActive=false;
-
-let boost=false;
-
 let worldSize=2600;
 
+let mouseX=W/2;
+let mouseY=H/2;
+
+let joystickActive=false;
+let boost=false;
+
 let lastTime=0;
+let messageTimer;
+
+let magnetTime=0;
+let zoomTime=0;
+let bonusTime=0;
+let speedTime=0;
 
 
 /* =========================
-   ENEMY COLORS
+   COIN SAVE
 ========================= */
 
-const enemyColors=[
-  "#ff4d6d",
-  "#38bdf8",
-  "#a78bfa",
-  "#facc15",
-  "#fb923c",
-  "#4ade80",
-  "#f472b6"
-];
+let wallet=
+Number(localStorage.getItem("dragonCoins")||0);
+
+function saveCoins(){
+localStorage.setItem(
+"dragonCoins",
+wallet
+);
+}
+
+function updateCoinUI(){
+
+document.getElementById("coinUI")
+.innerText=wallet;
+
+document.getElementById("shopCoins")
+.innerText=wallet;
+
+}
 
 
 /* =========================
    RANDOM
 ========================= */
 
-function random(min,max){
-
-  return Math.random()*(max-min)+min;
-
-}
-
-
-/* =========================
-   DISTANCE
-========================= */
-
-function distance(a,b){
-
-  return Math.hypot(
-    a.x-b.x,
-    a.y-b.y
-  );
-
+function random(a,b){
+return Math.random()*(b-a)+a;
 }
 
 
@@ -486,31 +469,22 @@ function distance(a,b){
 
 function createPlayer(){
 
-  return{
+return{
 
-    x:0,
-    y:0,
+x:0,
+y:0,
+angle:0,
+speed:2.7,
+radius:16,
+score:100,
+body:[],
+color:"#22c55e",
 
-    angle:0,
+name:
+document.getElementById("playerName")
+.value.trim()||"Dimas"
 
-    speed:2.7,
-
-    radius:16,
-
-    score:100,
-
-    body:[],
-
-    color:"#22c55e",
-
-    name:
-      document.getElementById(
-        "playerName"
-      ).value.trim() || "Dimas",
-
-    boost:false
-
-  };
+};
 
 }
 
@@ -521,118 +495,99 @@ function createPlayer(){
 
 function createEnemy(index){
 
-  let angle=
-    random(0,Math.PI*2);
+let a=random(0,Math.PI*2);
+let d=random(500,2200);
 
-  let dist=
-    random(400,worldSize*.85);
+let x=Math.cos(a)*d;
+let y=Math.sin(a)*d;
 
-  let x=
-    Math.cos(angle)*dist;
+let score=
+Math.floor(
+random(70,300)+level*25
+);
 
-  let y=
-    Math.sin(angle)*dist;
+let names=[
+"Draco",
+"Shadow",
+"Blaze",
+"Titan",
+"Storm",
+"Venom",
+"DragonX",
+"King",
+"Hunter",
+"Inferno"
+];
 
-  let score=
-    random(70,300)+level*25;
+let enemy={
 
-  let enemy={
+id:index,
+x:x,
+y:y,
 
-    id:index,
+angle:random(0,Math.PI*2),
+targetAngle:random(0,Math.PI*2),
 
-    x:x,
-    y:y,
+speed:1.8+level*.12,
+radius:14,
 
-    angle:
-      random(0,Math.PI*2),
+score:score,
 
-    targetAngle:
-      random(0,Math.PI*2),
+color:
+[
+"#ff4d6d",
+"#38bdf8",
+"#a78bfa",
+"#facc15",
+"#fb923c",
+"#4ade80",
+"#f472b6"
+][Math.floor(random(0,7))],
 
-    speed:
-      1.8+level*.12,
+name:
+names[Math.floor(random(0,names.length))],
 
-    radius:14,
+body:[],
+timer:0
 
-    score:
-      Math.floor(score),
+};
 
-    color:
-      enemyColors[
-        Math.floor(
-          Math.random()*
-          enemyColors.length
-        )
-      ],
+for(
+let i=0;
+i<10+Math.floor(score/25);
+i++
+){
 
-    name:
-      [
-        "Draco",
-        "Shadow",
-        "Blaze",
-        "Titan",
-        "Storm",
-        "Venom",
-        "DragonX",
-        "King",
-        "Hunter",
-        "Inferno"
-      ][
-        Math.floor(
-          Math.random()*10
-        )
-      ],
+enemy.body.push({
+x:x,
+y:y
+});
 
-    body:[],
+}
 
-    changeTimer:0
-
-  };
-
-
-  for(
-    let i=0;
-    i<10+Math.floor(score/25);
-    i++
-  ){
-
-    enemy.body.push({
-      x:x,
-      y:y
-    });
-
-  }
-
-  return enemy;
+return enemy;
 
 }
 
 
 /* =========================
-   CAKE FOOD 🍰
+   FOOD
 ========================= */
 
 function createFood(){
 
-  return{
+return{
 
-    x:
-      random(-worldSize,worldSize),
+x:random(-worldSize,worldSize),
+y:random(-worldSize,worldSize),
 
-    y:
-      random(-worldSize,worldSize),
+value:
+Math.random()<.15?20:5,
 
-    value:
-      Math.random()<.15
-      ?20
-      :5,
+size:
+Math.random()<.15?13:10
 
-    size:
-      Math.random()<.15
-      ?13
-      :10
-
-  };
+};
 
 }
 
@@ -643,297 +598,140 @@ function createFood(){
 
 function createCoin(){
 
-  return{
-
-    x:
-      random(-worldSize,worldSize),
-
-    y:
-      random(-worldSize,worldSize),
-
-    value:10
-
-  };
+return{
+x:random(-worldSize,worldSize),
+y:random(-worldSize,worldSize)
+};
 
 }
 
 
 /* =========================
-   START GAME
+   START
 ========================= */
 
 function startGame(){
 
-  document.getElementById(
-    "menu"
-  ).style.display="none";
+document.getElementById("menu").style.display="none";
+document.getElementById("gameOver").style.display="none";
 
-  document.getElementById(
-    "gameOver"
-  ).style.display="none";
+level=1;
+kills=0;
 
-  level=1;
-  kills=0;
+magnetTime=0;
+zoomTime=0;
+bonusTime=0;
+speedTime=0;
 
-  worldSize=2600;
+player=createPlayer();
 
-  player=createPlayer();
+enemies=[];
+foods=[];
+coins=[];
 
-  enemies=[];
-  foods=[];
-  coins=[];
+for(let i=0;i<8;i++)
+enemies.push(createEnemy(i));
 
+for(let i=0;i<180;i++)
+foods.push(createFood());
 
-  /*
-    8 MUSUH
-  */
+for(let i=0;i<40;i++)
+coins.push(createCoin());
 
-  for(let i=0;i<8;i++){
+for(let i=0;i<12;i++){
 
-    enemies.push(
-      createEnemy(i)
-    );
+player.body.push({
+x:player.x,
+y:player.y
+});
 
-  }
+}
 
+running=true;
 
-  /*
-    KUE
-  */
+updateCoinUI();
 
-  for(let i=0;i<170;i++){
+showMessage(
+"🔥 BATTLE DIMULAI!",
+1200
+);
 
-    foods.push(
-      createFood()
-    );
+lastTime=performance.now();
 
-  }
-
-
-  /*
-    COIN
-  */
-
-  for(let i=0;i<35;i++){
-
-    coins.push(
-      createCoin()
-    );
-
-  }
-
-
-  /*
-    PLAYER BODY
-  */
-
-  player.body=[];
-
-  for(let i=0;i<12;i++){
-
-    player.body.push({
-      x:player.x,
-      y:player.y
-    });
-
-  }
-
-
-  running=true;
-
-  showMessage(
-    "🔥 BATTLE DIMULAI!",
-    1200
-  );
-
-  lastTime=performance.now();
-
-  requestAnimationFrame(gameLoop);
+requestAnimationFrame(gameLoop);
 
 }
 
 
 /* =========================
-   MOUSE
+   FOOD SUCTION
 ========================= */
 
-canvas.addEventListener(
-  "mousemove",
-  e=>{
+function suctionRange(){
 
-    mouseX=e.clientX;
-    mouseY=e.clientY;
+let base=
+player.radius*1.5;
 
-  }
-);
+if(magnetTime>0)
+return 280;
 
-
-/* =========================
-   TOUCH
-========================= */
-
-canvas.addEventListener(
-  "touchmove",
-  e=>{
-
-    if(e.touches.length){
-
-      mouseX=e.touches[0].clientX;
-      mouseY=e.touches[0].clientY;
-
-    }
-
-  },
-  {passive:true}
-);
-
-
-/* =========================
-   JOYSTICK
-========================= */
-
-const joystick=
-  document.getElementById(
-    "joystick"
-  );
-
-const stick=
-  document.getElementById(
-    "stick"
-  );
-
-
-function joystickMove(e){
-
-  let rect=
-    joystick.getBoundingClientRect();
-
-  let cx=
-    rect.left+
-    rect.width/2;
-
-  let cy=
-    rect.top+
-    rect.height/2;
-
-  let x=
-    e.clientX-cx;
-
-  let y=
-    e.clientY-cy;
-
-  let max=
-    rect.width/2-27;
-
-  let len=
-    Math.hypot(x,y);
-
-  if(len>max){
-
-    x=x/len*max;
-    y=y/len*max;
-
-  }
-
-  stick.style.transform=
-    `translate(${x}px,${y}px)`;
-
-  if(Math.hypot(x,y)>10){
-
-    player.angle=
-      Math.atan2(y,x);
-
-    joystickActive=true;
-
-  }
+return base;
 
 }
 
 
-joystick.addEventListener(
-  "pointerdown",
-  e=>{
+function suckItems(){
 
-    joystick.setPointerCapture(
-      e.pointerId
-    );
+let range=suctionRange();
 
-    joystickMove(e);
-
-  }
-);
+let bonus=
+bonusTime>0?5:1;
 
 
-joystick.addEventListener(
-  "pointermove",
-  e=>{
+/* FOOD */
 
-    if(e.buttons)
-      joystickMove(e);
+foods.forEach(food=>{
 
-  }
-);
+let dx=player.x-food.x;
+let dy=player.y-food.y;
 
+let d=Math.hypot(dx,dy);
 
-joystick.addEventListener(
-  "pointerup",
-  ()=>{
-    joystickActive=false;
+if(d<range){
 
-    stick.style.transform=
-      "translate(0,0)";
-  }
-);
+let force=
+magnetTime>0?.12:.18;
 
+food.x+=dx*force;
+food.y+=dy*force;
 
-joystick.addEventListener(
-  "pointercancel",
-  ()=>{
-    joystickActive=false;
+}
 
-    stick.style.transform=
-      "translate(0,0)";
-  }
-);
+});
 
 
-/* =========================
-   BOOST
-========================= */
+/* COINS */
 
-const boostBtn=
-  document.getElementById(
-    "boostBtn"
-  );
+coins.forEach(coin=>{
 
-boostBtn.addEventListener(
-  "pointerdown",
-  e=>{
-    e.preventDefault();
-    boost=true;
-  }
-);
+let dx=player.x-coin.x;
+let dy=player.y-coin.y;
 
-boostBtn.addEventListener(
-  "pointerup",
-  ()=>{
-    boost=false;
-  }
-);
+let d=Math.hypot(dx,dy);
 
-boostBtn.addEventListener(
-  "pointercancel",
-  ()=>{
-    boost=false;
-  }
-);
+if(d<range){
 
-boostBtn.addEventListener(
-  "pointerleave",
-  ()=>{
-    boost=false;
-  }
-);
+let force=
+magnetTime>0?.12:.18;
+
+coin.x+=dx*force;
+coin.y+=dy*force;
+
+}
+
+});
+
+}
 
 
 /* =========================
@@ -942,508 +740,343 @@ boostBtn.addEventListener(
 
 function updatePlayer(){
 
-  if(!joystickActive){
+if(!joystickActive){
 
-    let dx=
-      mouseX-W/2;
+let dx=mouseX-W/2;
+let dy=mouseY-H/2;
 
-    let dy=
-      mouseY-H/2;
+if(Math.hypot(dx,dy)>15)
+player.angle=Math.atan2(dy,dx);
 
-    if(Math.hypot(dx,dy)>15){
-
-      player.angle=
-        Math.atan2(dy,dx);
-
-    }
-
-  }
+}
 
 
-  let speed=
-    boost
-    ?4.8
-    :2.7;
+let speed=
+boost?4.8:2.7;
+
+if(speedTime>0)
+speed*=2;
 
 
-  player.x +=
-    Math.cos(player.angle)*speed;
+player.x+=
+Math.cos(player.angle)*speed;
 
-  player.y +=
-    Math.sin(player.angle)*speed;
-
-
-  /*
-    WORLD WRAP
-  */
-
-  if(player.x>worldSize)
-    player.x=-worldSize;
-
-  if(player.x<-worldSize)
-    player.x=worldSize;
-
-  if(player.y>worldSize)
-    player.y=-worldSize;
-
-  if(player.y<-worldSize)
-    player.y=worldSize;
+player.y+=
+Math.sin(player.angle)*speed;
 
 
-  /*
-    BODY
-  */
+/* WRAP */
 
-  player.body.unshift({
-    x:player.x,
-    y:player.y
-  });
+if(player.x>worldSize)
+player.x=-worldSize;
+
+if(player.x<-worldSize)
+player.x=worldSize;
+
+if(player.y>worldSize)
+player.y=-worldSize;
+
+if(player.y<-worldSize)
+player.y=worldSize;
 
 
-  let wanted=
-    12+
-    Math.floor(player.score/5);
+/* BODY */
 
+player.body.unshift({
+x:player.x,
+y:player.y
+});
 
-  while(
-    player.body.length>wanted
-  ){
+let wanted=
+12+
+Math.floor(player.score/5);
 
-    player.body.pop();
-
-  }
+while(player.body.length>wanted)
+player.body.pop();
 
 }
 
 
 /* =========================
-   HARD ENEMY AI 🤖
+   ENEMY AI
 ========================= */
 
 function updateEnemies(){
 
-  enemies.forEach(enemy=>{
+enemies.forEach(enemy=>{
 
-    enemy.changeTimer--;
+enemy.timer--;
 
+let dx=player.x-enemy.x;
+let dy=player.y-enemy.y;
 
-    let dx=
-      player.x-enemy.x;
+let dist=Math.hypot(dx,dy);
 
-    let dy=
-      player.y-enemy.y;
+let range=850+level*90;
 
-    let distToPlayer=
-      Math.hypot(dx,dy);
+if(dist<range){
 
+let predict=120+level*20;
 
-    /*
-      AGGRESSIVE RANGE
-    */
+let tx=
+player.x+
+Math.cos(player.angle)*predict;
 
-    let aggressiveRange=
-      850+
-      level*80;
+let ty=
+player.y+
+Math.sin(player.angle)*predict;
 
+enemy.targetAngle=
+Math.atan2(
+ty-enemy.y,
+tx-enemy.x
+);
 
-    if(
-      distToPlayer<
-      aggressiveRange
-    ){
+enemy.speed=
+2+level*.14;
 
-      /*
-        PREDICT PLAYER
-      */
+if(enemy.score>player.score)
+enemy.speed+=.5;
 
-      let predict=
-        120+
-        level*20;
+}else{
 
-      let targetX=
-        player.x+
-        Math.cos(player.angle)*
-        predict;
+if(enemy.timer<=0){
 
-      let targetY=
-        player.y+
-        Math.sin(player.angle)*
-        predict;
+enemy.timer=random(30,100);
 
+let nearest=null;
+let nd=Infinity;
 
-      enemy.targetAngle=
-        Math.atan2(
-          targetY-enemy.y,
-          targetX-enemy.x
-        );
+foods.forEach(food=>{
 
+let d=
+Math.hypot(
+enemy.x-food.x,
+enemy.y-food.y
+);
 
-      /*
-        MUSUH LEBIH BESAR
-        LEBIH AGRESIF
-      */
+if(d<nd){
+nd=d;
+nearest=food;
+}
 
-      enemy.speed=
-        2+
-        level*.14;
+});
 
+if(nearest){
 
-      if(
-        enemy.score>
-        player.score
-      ){
+enemy.targetAngle=
+Math.atan2(
+nearest.y-enemy.y,
+nearest.x-enemy.x
+);
 
-        enemy.speed+=.5;
+}else{
 
-      }
+enemy.targetAngle=
+random(0,Math.PI*2);
 
-    }else{
+}
 
-      /*
-        CARI KUE
-      */
+}
 
-      if(
-        enemy.changeTimer<=0
-      ){
+enemy.speed=
+1.7+level*.1;
 
-        enemy.changeTimer=
-          random(
-            25,
-            Math.max(
-              60,
-              140-level*5
-            )
-          );
+}
 
 
-        let nearestFood=null;
+/* TURN */
 
-        let nearestDist=
-          Infinity;
+let diff=
+enemy.targetAngle-enemy.angle;
 
+while(diff>Math.PI)
+diff-=Math.PI*2;
 
-        foods.forEach(food=>{
+while(diff<-Math.PI)
+diff+=Math.PI*2;
 
-          let d=
-            Math.hypot(
-              enemy.x-food.x,
-              enemy.y-food.y
-            );
+enemy.angle+=
+diff*(.055+level*.003);
 
 
-          if(d<nearestDist){
+/* MOVE */
 
-            nearestDist=d;
-            nearestFood=food;
+enemy.x+=
+Math.cos(enemy.angle)*enemy.speed;
 
-          }
+enemy.y+=
+Math.sin(enemy.angle)*enemy.speed;
 
-        });
 
+/* WRAP */
 
-        if(
-          nearestFood &&
-          nearestDist<700
-        ){
+if(enemy.x>worldSize)
+enemy.x=-worldSize;
 
-          enemy.targetAngle=
-            Math.atan2(
-              nearestFood.y-enemy.y,
-              nearestFood.x-enemy.x
-            );
+if(enemy.x<-worldSize)
+enemy.x=worldSize;
 
-        }else{
+if(enemy.y>worldSize)
+enemy.y=-worldSize;
 
-          enemy.targetAngle=
-            random(
-              0,
-              Math.PI*2
-            );
+if(enemy.y<-worldSize)
+enemy.y=worldSize;
 
-        }
 
-      }
+/* BODY */
 
+enemy.body.unshift({
+x:enemy.x,
+y:enemy.y
+});
 
-      enemy.speed=
-        1.7+
-        level*.10;
+let wanted=
+12+
+Math.floor(enemy.score/5);
 
-    }
+while(enemy.body.length>wanted)
+enemy.body.pop();
 
-
-    /*
-      TURN
-    */
-
-    let diff=
-      enemy.targetAngle-
-      enemy.angle;
-
-
-    while(diff>Math.PI)
-      diff-=Math.PI*2;
-
-    while(diff<-Math.PI)
-      diff+=Math.PI*2;
-
-
-    enemy.angle +=
-      diff*
-      (.055+level*.003);
-
-
-    /*
-      MOVE
-    */
-
-    enemy.x +=
-      Math.cos(enemy.angle)*
-      enemy.speed;
-
-    enemy.y +=
-      Math.sin(enemy.angle)*
-      enemy.speed;
-
-
-    /*
-      WRAP
-    */
-
-    if(enemy.x>worldSize)
-      enemy.x=-worldSize;
-
-    if(enemy.x<-worldSize)
-      enemy.x=worldSize;
-
-    if(enemy.y>worldSize)
-      enemy.y=-worldSize;
-
-    if(enemy.y<-worldSize)
-      enemy.y=worldSize;
-
-
-    /*
-      BODY
-    */
-
-    enemy.body.unshift({
-      x:enemy.x,
-      y:enemy.y
-    });
-
-
-    let wanted=
-      12+
-      Math.floor(enemy.score/5);
-
-
-    while(
-      enemy.body.length>wanted
-    ){
-
-      enemy.body.pop();
-
-    }
-
-  });
+});
 
 }
 
 
 /* =========================
-   EAT CAKE
+   EAT
 ========================= */
 
 function eatFood(){
 
-  for(
-    let i=foods.length-1;
-    i>=0;
-    i--
-  ){
+let range=
+player.radius+
+12;
 
-    let food=foods[i];
-
-    if(
-      Math.hypot(
-        player.x-food.x,
-        player.y-food.y
-      )
-      <
-      player.radius+
-      food.size
-    ){
-
-      player.score+=food.value;
-
-      foods.splice(i,1);
-
-      foods.push(
-        createFood()
-      );
+let multiplier=
+bonusTime>0?5:1;
 
 
-      if(food.value>=20){
+/* FOOD */
 
-        showMessage(
-          "🍰 KUE BESAR +20!",
-          600
-        );
+for(let i=foods.length-1;i>=0;i--){
 
-      }
+let f=foods[i];
 
-    }
+let d=
+Math.hypot(
+player.x-f.x,
+player.y-f.y
+);
 
-  }
+if(d<range){
+
+player.score+=
+f.value*multiplier;
+
+foods.splice(i,1);
+foods.push(createFood());
+
+}
+
+}
 
 
-  /*
-    COINS
-  */
+/* COINS */
 
-  for(
-    let i=coins.length-1;
-    i>=0;
-    i--
-  ){
+for(let i=coins.length-1;i>=0;i--){
 
-    let coin=coins[i];
+let c=coins[i];
 
-    if(
-      Math.hypot(
-        player.x-coin.x,
-        player.y-coin.y
-      )
-      <
-      player.radius+12
-    ){
+let d=
+Math.hypot(
+player.x-c.x,
+player.y-c.y
+);
 
-      player.score+=10;
+if(d<range){
 
-      coins.splice(i,1);
+wallet+=
+bonusTime>0?5:1;
 
-      coins.push(
-        createCoin()
-      );
+saveCoins();
+updateCoinUI();
 
-      showMessage(
-        "🪙 +10 COIN",
-        500
-      );
+coins.splice(i,1);
+coins.push(createCoin());
 
-    }
+showMessage(
+"🪙 KOIN!",
+500
+);
 
-  }
+}
+
+}
 
 }
 
 
 /* =========================
-   HEAD VS HEAD
+   HEAD BATTLE
 ========================= */
 
 function headBattle(){
 
-  for(
-    let i=enemies.length-1;
-    i>=0;
-    i--
-  ){
+for(let i=enemies.length-1;i>=0;i--){
 
-    let enemy=enemies[i];
+let e=enemies[i];
 
-    let d=
-      Math.hypot(
-        player.x-enemy.x,
-        player.y-enemy.y
-      );
+let d=
+Math.hypot(
+player.x-e.x,
+player.y-e.y
+);
 
+if(
+d<
+player.radius+
+e.radius+
+5
+){
 
-    if(
-      d<
-      player.radius+
-      enemy.radius+
-      5
-    ){
+if(player.score>e.score){
 
-      /*
-        PLAYER MENANG
-      */
+let reward=
+Math.floor(e.score*.6);
 
-      if(
-        player.score>
-        enemy.score
-      ){
+player.score+=reward;
 
-        let reward=
-          Math.floor(
-            enemy.score*.6
-          );
+kills++;
 
-        player.score+=reward;
+dropEnemyFood(e);
 
-        kills++;
+showMessage(
+"⚔️ "+e.name+
+" KALAH! +"+
+reward,
+1100
+);
 
+enemies.splice(i,1);
+enemies.push(
+createEnemy(Math.random()*9999)
+);
 
-        showMessage(
-          "⚔️ "+enemy.name+
-          " KALAH! +"+
-          reward+
-          " POIN",
-          1300
-        );
+}else{
 
+gameOver(
+"💀 "+e.name+
+" mengalahkanmu!"
+);
 
-        dropEnemyFood(enemy);
+return;
 
+}
 
-        enemies.splice(i,1);
+}
 
-        enemies.push(
-          createEnemy(
-            Math.random()*10000
-          )
-        );
-
-
-      }
-
-      /*
-        PLAYER KALAH
-      */
-
-      else if(
-        player.score<
-        enemy.score
-      ){
-
-        gameOver(
-          "💀 "+enemy.name+
-          " mengalahkanmu!"
-        );
-
-        return;
-
-      }
-
-      /*
-        SERI
-      */
-
-      else{
-
-        gameOver(
-          "💥 Head-to-head seri!"
-        );
-
-        return;
-
-      }
-
-    }
-
-  }
+}
 
 }
 
@@ -1454,197 +1087,135 @@ function headBattle(){
 
 function bodyCollision(){
 
-  /*
-    KEPALA PLAYER
-    MENABRAK BADAN MUSUH
-  */
+/* PLAYER HEAD -> ENEMY BODY */
 
-  for(
-    let i=enemies.length-1;
-    i>=0;
-    i--
-  ){
+for(let i=enemies.length-1;i>=0;i--){
 
-    let enemy=enemies[i];
+let e=enemies[i];
 
+for(let j=7;j<e.body.length;j+=2){
 
-    /*
-      Mulai dari bagian ke-7
-      agar kepala musuh tidak
-      dihitung sebagai badan.
-    */
+let p=e.body[j];
 
-    for(
-      let j=7;
-      j<enemy.body.length;
-      j+=2
-    ){
+let d=
+Math.hypot(
+player.x-p.x,
+player.y-p.y
+);
 
-      let part=
-        enemy.body[j];
+if(
+d<
+player.radius+
+e.radius*.7
+){
 
+gameOver(
+"💀 Kamu menabrak badan "+
+e.name+"!"
+);
 
-      let d=
-        Math.hypot(
-          player.x-part.x,
-          player.y-part.y
-        );
+return;
 
+}
 
-      if(
-        d<
-        player.radius+
-        enemy.radius*.72
-      ){
+}
 
-        gameOver(
-          "💀 Kamu menabrak badan "+
-          enemy.name+"!"
-        );
-
-        return;
-
-      }
-
-    }
-
-  }
+}
 
 
-  /*
-    KEPALA MUSUH
-    MENABRAK BADAN PLAYER
-  */
+/* ENEMY HEAD -> PLAYER BODY */
 
-  for(
-    let i=enemies.length-1;
-    i>=0;
-    i--
-  ){
+for(let i=enemies.length-1;i>=0;i--){
 
-    let enemy=enemies[i];
+let e=enemies[i];
 
+for(let j=8;j<player.body.length;j+=2){
 
-    for(
-      let j=8;
-      j<player.body.length;
-      j+=2
-    ){
+let p=player.body[j];
 
-      let part=
-        player.body[j];
+let d=
+Math.hypot(
+e.x-p.x,
+e.y-p.y
+);
 
+if(
+d<
+e.radius+
+player.radius*.7
+){
 
-      let d=
-        Math.hypot(
-          enemy.x-part.x,
-          enemy.y-part.y
-        );
+let reward=
+Math.floor(e.score*.7);
 
+player.score+=reward;
 
-      if(
-        d<
-        enemy.radius+
-        player.radius*.72
-      ){
+kills++;
 
-        let reward=
-          Math.floor(
-            enemy.score*.7
-          );
+dropEnemyFood(e);
 
+showMessage(
+"💥 "+e.name+
+" MENABRAK BADANMU! +"+
+reward,
+1300
+);
 
-        player.score+=reward;
+enemies.splice(i,1);
 
-        kills++;
+enemies.push(
+createEnemy(Math.random()*9999)
+);
 
+break;
 
-        showMessage(
-          "💥 "+enemy.name+
-          " MENABRAK BADANMU! +"+
-          reward,
-          1400
-        );
+}
 
+}
 
-        /*
-          MUSUH MENJADI KUE
-        */
-
-        dropEnemyFood(enemy);
-
-
-        enemies.splice(i,1);
-
-        enemies.push(
-          createEnemy(
-            Math.random()*10000
-          )
-        );
-
-        return;
-
-      }
-
-    }
-
-  }
+}
 
 }
 
 
 /* =========================
-   ENEMY DEATH FOOD
+   DROP FOOD
 ========================= */
 
-function dropEnemyFood(enemy){
+function dropEnemyFood(e){
 
-  let amount=
-    Math.min(
-      30,
-      Math.max(
-        12,
-        Math.floor(
-          enemy.body.length/2
-        )
-      )
-    );
+let amount=
+Math.min(
+35,
+Math.max(
+12,
+Math.floor(e.body.length/2)
+)
+);
 
+for(let i=0;i<amount;i++){
 
-  for(let i=0;i<amount;i++){
+let p=
+e.body[
+Math.floor(
+Math.random()*e.body.length
+)
+];
 
-    let part=
-      enemy.body[
-        Math.floor(
-          Math.random()*
-          enemy.body.length
-        )
-      ];
+foods.push({
 
+x:p.x+random(-40,40),
+y:p.y+random(-40,40),
 
-    foods.push({
+value:
+Math.random()<.25?20:5,
 
-      x:
-        part.x+
-        random(-35,35),
+size:
+Math.random()<.25?13:10
 
-      y:
-        part.y+
-        random(-35,35),
+});
 
-      value:
-        Math.random()<.25
-        ?20
-        :5,
-
-      size:
-        Math.random()<.25
-        ?13
-        :10
-
-    });
-
-  }
+}
 
 }
 
@@ -1655,712 +1226,449 @@ function dropEnemyFood(enemy){
 
 function updateLevel(){
 
-  let newLevel=
-    Math.min(
-      10,
-      1+
-      Math.floor(
-        player.score/150
-      )
-    );
+let newLevel=
+Math.min(
+10,
+1+
+Math.floor(player.score/150)
+);
 
+if(newLevel>level){
 
-  if(
-    newLevel>level
-  ){
+level=newLevel;
 
-    level=newLevel;
+showMessage(
+"🔥 LEVEL "+level,
+1200
+);
 
+if(enemies.length<
+Math.min(15,8+level)
+){
 
-    showMessage(
-      "🔥 LEVEL "+
-      level+
-      "!",
-      1200
-    );
+enemies.push(
+createEnemy(Math.random()*9999)
+);
 
+}
 
-    /*
-      Tambah musuh
-    */
-
-    if(
-      enemies.length<
-      Math.min(14,8+level)
-    ){
-
-      enemies.push(
-        createEnemy(
-          Math.random()*10000
-        )
-      );
-
-    }
-
-  }
+}
 
 }
 
 
 /* =========================
-   DRAW WORLD
+   POWER TIMER
+========================= */
+
+function updatePowers(){
+
+/*
+  frame kira-kira 60 fps
+*/
+
+if(magnetTime>0)
+magnetTime--;
+
+if(zoomTime>0)
+zoomTime--;
+
+if(bonusTime>0)
+bonusTime--;
+
+if(speedTime>0)
+speedTime--;
+
+let html="";
+
+if(magnetTime>0)
+html+=
+`<div class="power">🧲 Magnet ${Math.ceil(magnetTime/60)}s</div>`;
+
+if(zoomTime>0)
+html+=
+`<div class="power">🔍 Zoom ${Math.ceil(zoomTime/60)}s</div>`;
+
+if(bonusTime>0)
+html+=
+`<div class="power">✖️5 Bonus ${Math.ceil(bonusTime/60)}s</div>`;
+
+if(speedTime>0)
+html+=
+`<div class="power">⚡ Speed 2× ${Math.ceil(speedTime/60)}s</div>`;
+
+document.getElementById("powerUI").innerHTML=html;
+
+}
+
+
+/* =========================
+   DRAW
 ========================= */
 
 function drawWorld(){
 
-  ctx.fillStyle="#071522";
+ctx.fillStyle="#071522";
+ctx.fillRect(0,0,W,H);
 
-  ctx.fillRect(
-    0,
-    0,
-    W,
-    H
-  );
+ctx.save();
 
 
-  ctx.save();
+/*
+  ZOOM
+*/
+
+let zoom=
+zoomTime>0?.72:1;
+
+ctx.translate(W/2,H/2);
+ctx.scale(zoom,zoom);
+ctx.translate(-player.x,-player.y);
 
 
-  /*
-    CAMERA
-  */
+/* GRID */
 
-  ctx.translate(
-    W/2-player.x,
-    H/2-player.y
-  );
+ctx.strokeStyle=
+"rgba(255,255,255,.045)";
 
+ctx.lineWidth=1;
 
-  /*
-    GRID
-  */
+for(
+let x=-worldSize;
+x<=worldSize;
+x+=100
+){
 
-  let grid=100;
+ctx.beginPath();
+ctx.moveTo(x,-worldSize);
+ctx.lineTo(x,worldSize);
+ctx.stroke();
 
-  ctx.strokeStyle=
-    "rgba(255,255,255,.045)";
+}
 
-  ctx.lineWidth=1;
+for(
+let y=-worldSize;
+y<=worldSize;
+y+=100
+){
 
+ctx.beginPath();
+ctx.moveTo(-worldSize,y);
+ctx.lineTo(worldSize,y);
+ctx.stroke();
 
-  for(
-    let x=-worldSize;
-    x<=worldSize;
-    x+=grid
-  ){
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-      x,
-      -worldSize
-    );
-
-    ctx.lineTo(
-      x,
-      worldSize
-    );
-
-    ctx.stroke();
-
-  }
+}
 
 
-  for(
-    let y=-worldSize;
-    y<=worldSize;
-    y+=grid
-  ){
+/* BORDER */
 
-    ctx.beginPath();
+ctx.strokeStyle=
+"rgba(56,189,248,.3)";
 
-    ctx.moveTo(
-      -worldSize,
-      y
-    );
+ctx.lineWidth=8;
 
-    ctx.lineTo(
-      worldSize,
-      y
-    );
-
-    ctx.stroke();
-
-  }
+ctx.strokeRect(
+-worldSize,
+-worldSize,
+worldSize*2,
+worldSize*2
+);
 
 
-  /*
-    ARENA BORDER
-  */
+drawFoods();
+drawCoins();
 
-  ctx.strokeStyle=
-    "rgba(56,189,248,.25)";
+enemies.forEach(drawSnake);
 
-  ctx.lineWidth=8;
-
-  ctx.strokeRect(
-    -worldSize,
-    -worldSize,
-    worldSize*2,
-    worldSize*2
-  );
+drawSnake(player);
 
 
-  drawFoods();
-
-  drawCoins();
-
-  enemies.forEach(
-    drawSnake
-  );
-
-  drawSnake(player);
-
-
-  ctx.restore();
+ctx.restore();
 
 }
 
 
 /* =========================
-   DRAW CAKES
+   CAKE
 ========================= */
 
 function drawFoods(){
 
-  foods.forEach(food=>{
+foods.forEach(f=>{
 
-    ctx.save();
+ctx.save();
 
-    ctx.translate(
-      food.x,
-      food.y
-    );
+ctx.translate(f.x,f.y);
 
+if(f.value>=20){
 
-    /*
-      SHADOW
-    */
+ctx.shadowColor="#ffd43b";
+ctx.shadowBlur=15;
 
-    ctx.fillStyle=
-      "rgba(0,0,0,.25)";
+}
 
-    ctx.beginPath();
+ctx.fillStyle="#d89452";
 
-    ctx.ellipse(
-      0,
-      9,
-      food.size+4,
-      5,
-      0,
-      0,
-      Math.PI*2
-    );
+ctx.beginPath();
 
-    ctx.fill();
+ctx.roundRect(
+-f.size,
+-f.size/2,
+f.size*2,
+f.size*1.25,
+5
+);
 
+ctx.fill();
 
-    /*
-      CAKE BODY
-    */
+ctx.shadowBlur=0;
 
-    ctx.fillStyle=
-      "#d89452";
+ctx.fillStyle="#fff4dc";
 
-    ctx.beginPath();
+ctx.beginPath();
 
-    ctx.roundRect(
-      -food.size,
-      -food.size/2,
-      food.size*2,
-      food.size*1.25,
-      5
-    );
+ctx.ellipse(
+0,
+-f.size/2,
+f.size,
+f.size*.42,
+0,
+0,
+Math.PI*2
+);
 
-    ctx.fill();
+ctx.fill();
 
+ctx.fillStyle="#713f12";
 
-    /*
-      CREAM
-    */
+ctx.beginPath();
 
-    ctx.fillStyle=
-      "#fff5df";
+ctx.arc(-f.size*.4,0,2.5,0,Math.PI*2);
+ctx.arc(f.size*.35,-2,2.5,0,Math.PI*2);
 
-    ctx.beginPath();
+ctx.fill();
 
-    ctx.ellipse(
-      0,
-      -food.size/2,
-      food.size,
-      food.size*.43,
-      0,
-      0,
-      Math.PI*2
-    );
+ctx.restore();
 
-    ctx.fill();
-
-
-    /*
-      CHOCOLATE
-    */
-
-    ctx.fillStyle=
-      "#713f12";
-
-    ctx.beginPath();
-
-    ctx.arc(
-      -food.size*.45,
-      -food.size*.05,
-      2.5,
-      0,
-      Math.PI*2
-    );
-
-    ctx.arc(
-      food.size*.35,
-      -food.size*.15,
-      2.5,
-      0,
-      Math.PI*2
-    );
-
-    ctx.arc(
-      0,
-      food.size*.25,
-      2.5,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    /*
-      BIG CAKE
-    */
-
-    if(food.value>=20){
-
-      ctx.strokeStyle=
-        "#ffd43b";
-
-      ctx.lineWidth=3;
-
-      ctx.shadowColor=
-        "#ffd43b";
-
-      ctx.shadowBlur=15;
-
-      ctx.strokeRect(
-        -food.size-2,
-        -food.size/2-2,
-        food.size*2+4,
-        food.size*1.25+4
-      );
-
-    }
-
-
-    ctx.restore();
-
-  });
+});
 
 }
 
 
 /* =========================
-   DRAW COINS
+   COINS
 ========================= */
 
 function drawCoins(){
 
-  coins.forEach(coin=>{
+coins.forEach(c=>{
 
-    ctx.save();
+ctx.save();
 
-    ctx.translate(
-      coin.x,
-      coin.y
-    );
+ctx.translate(c.x,c.y);
 
+ctx.shadowColor="#ffd43b";
+ctx.shadowBlur=10;
 
-    ctx.beginPath();
+ctx.beginPath();
 
-    ctx.arc(
-      0,
-      0,
-      10,
-      0,
-      Math.PI*2
-    );
+ctx.arc(
+0,0,
+10,
+0,
+Math.PI*2
+);
 
-    ctx.fillStyle=
-      "#ffd43b";
+ctx.fillStyle="#ffd43b";
+ctx.fill();
 
-    ctx.fill();
+ctx.shadowBlur=0;
 
-    ctx.strokeStyle=
-      "#fff";
+ctx.fillStyle="#704800";
+ctx.font="bold 12px Arial";
+ctx.textAlign="center";
+ctx.textBaseline="middle";
 
-    ctx.lineWidth=2;
+ctx.fillText("$",0,1);
 
-    ctx.stroke();
+ctx.restore();
 
-
-    ctx.fillStyle=
-      "#9b6500";
-
-    ctx.font=
-      "bold 11px Arial";
-
-    ctx.textAlign=
-      "center";
-
-    ctx.textBaseline=
-      "middle";
-
-    ctx.fillText(
-      "$",
-      0,
-      1
-    );
-
-
-    ctx.restore();
-
-  });
+});
 
 }
 
 
 /* =========================
-   DRAW SNAKE
+   SNAKE
 ========================= */
 
-function drawSnake(snake){
+function drawSnake(s){
 
-  /*
-    BODY
-  */
+for(
+let i=s.body.length-1;
+i>=0;
+i--
+){
 
-  for(
-    let i=snake.body.length-1;
-    i>=0;
-    i--
-  ){
+let p=s.body[i];
 
-    let part=
-      snake.body[i];
+let r=
+s.radius*
+(.65+(i/s.body.length)*.35);
 
+ctx.beginPath();
 
-    let ratio=
-      i/snake.body.length;
+ctx.arc(
+p.x,
+p.y,
+r,
+0,
+Math.PI*2
+);
 
+ctx.fillStyle=s.color;
+ctx.fill();
 
-    let r=
-      snake.radius*
-      (.65+ratio*.35);
+if(i%5===0){
 
+ctx.beginPath();
 
-    ctx.beginPath();
+ctx.arc(
+p.x-r*.2,
+p.y-r*.2,
+r*.22,
+0,
+Math.PI*2
+);
 
-    ctx.arc(
-      part.x,
-      part.y,
-      r,
-      0,
-      Math.PI*2
-    );
+ctx.fillStyle="rgba(255,255,255,.25)";
+ctx.fill();
 
-
-    ctx.fillStyle=
-      snake.color;
-
-    ctx.globalAlpha=.92;
-
-    ctx.fill();
-
-    ctx.globalAlpha=1;
-
-
-    /*
-      SCALE
-    */
-
-    if(i%5===0){
-
-      ctx.beginPath();
-
-      ctx.arc(
-        part.x-r*.2,
-        part.y-r*.2,
-        r*.25,
-        0,
-        Math.PI*2
-      );
-
-      ctx.fillStyle=
-        "rgba(255,255,255,.25)";
-
-      ctx.fill();
-
-    }
-
-  }
-
-
-  /*
-    HEAD
-  */
-
-  ctx.save();
-
-  ctx.translate(
-    snake.x,
-    snake.y
-  );
-
-  ctx.rotate(
-    snake.angle
-  );
-
-
-  ctx.beginPath();
-
-  ctx.arc(
-    0,
-    0,
-    snake.radius+2,
-    0,
-    Math.PI*2
-  );
-
-  ctx.fillStyle=
-    snake.color;
-
-  ctx.fill();
-
-
-  /*
-    HORNS
-  */
-
-  ctx.fillStyle=
-    "#f8fafc";
-
-
-  ctx.beginPath();
-
-  ctx.moveTo(
-    -5,
-    -snake.radius
-  );
-
-  ctx.lineTo(
-    -11,
-    -snake.radius-10
-  );
-
-  ctx.lineTo(
-    1,
-    -snake.radius-5
-  );
-
-  ctx.fill();
-
-
-  ctx.beginPath();
-
-  ctx.moveTo(
-    -5,
-    snake.radius
-  );
-
-  ctx.lineTo(
-    -11,
-    snake.radius+10
-  );
-
-  ctx.lineTo(
-    1,
-    snake.radius+5
-  );
-
-  ctx.fill();
-
-
-  /*
-    EYES
-  */
-
-  ctx.fillStyle=
-    "white";
-
-
-  ctx.beginPath();
-
-  ctx.arc(
-    7,
-    -6,
-    4,
-    0,
-    Math.PI*2
-  );
-
-  ctx.arc(
-    7,
-    6,
-    4,
-    0,
-    Math.PI*2
-  );
-
-  ctx.fill();
-
-
-  ctx.fillStyle="#111";
-
-
-  ctx.beginPath();
-
-  ctx.arc(
-    8,
-    -6,
-    2,
-    0,
-    Math.PI*2
-  );
-
-  ctx.arc(
-    8,
-    6,
-    2,
-    0,
-    Math.PI*2
-  );
-
-  ctx.fill();
-
-
-  /*
-    MOUTH
-  */
-
-  ctx.strokeStyle=
-    "rgba(0,0,0,.55)";
-
-  ctx.lineWidth=2;
-
-  ctx.beginPath();
-
-  ctx.moveTo(
-    10,
-    0
-  );
-
-  ctx.lineTo(
-    snake.radius+8,
-    0
-  );
-
-  ctx.stroke();
-
-
-  ctx.restore();
-
-
-  /*
-    NAME
-  */
-
-  ctx.fillStyle=
-    "white";
-
-  ctx.font=
-    "bold 12px Arial";
-
-  ctx.textAlign=
-    "center";
-
-  ctx.shadowColor=
-    "#000";
-
-  ctx.shadowBlur=4;
-
-  ctx.fillText(
-    snake.name||"",
-    snake.x,
-    snake.y-
-    snake.radius-
-    17
-  );
-
-  ctx.shadowBlur=0;
+}
 
 }
 
 
-/* =========================
-   LEADERBOARD
-========================= */
+/* HEAD */
 
-function updateLeaderboard(){
+ctx.save();
 
-  let list=[
-    {
-      name:player.name,
-      score:player.score,
-      me:true
-    }
-  ];
+ctx.translate(s.x,s.y);
+ctx.rotate(s.angle);
 
+ctx.beginPath();
 
-  enemies.forEach(e=>{
+ctx.arc(
+0,
+0,
+s.radius+2,
+0,
+Math.PI*2
+);
 
-    list.push({
-      name:e.name,
-      score:e.score,
-      me:false
-    });
-
-  });
+ctx.fillStyle=s.color;
+ctx.fill();
 
 
-  list.sort(
-    (a,b)=>
-      b.score-a.score
-  );
+/* HORNS */
+
+ctx.fillStyle="white";
+
+ctx.beginPath();
+
+ctx.moveTo(-5,-s.radius);
+ctx.lineTo(-11,-s.radius-10);
+ctx.lineTo(1,-s.radius-5);
+ctx.fill();
+
+ctx.beginPath();
+
+ctx.moveTo(-5,s.radius);
+ctx.lineTo(-11,s.radius+10);
+ctx.lineTo(1,s.radius+5);
+ctx.fill();
 
 
-  let html="";
+/* EYES */
+
+ctx.fillStyle="white";
+
+ctx.beginPath();
+
+ctx.arc(7,-6,4,0,Math.PI*2);
+ctx.arc(7,6,4,0,Math.PI*2);
+
+ctx.fill();
+
+ctx.fillStyle="#111";
+
+ctx.beginPath();
+
+ctx.arc(8,-6,2,0,Math.PI*2);
+ctx.arc(8,6,2,0,Math.PI*2);
+
+ctx.fill();
 
 
-  list
-    .slice(0,5)
-    .forEach(
-      (p,i)=>{
+/* MOUTH */
 
-        html+=`
-          <div class="rankRow">
-            <span>
-              ${i+1}. ${p.name}
-            </span>
-            <b>
-              ${Math.floor(p.score)}
-            </b>
-          </div>
-        `;
+ctx.strokeStyle="#111";
+ctx.lineWidth=2;
 
-      }
-    );
+ctx.beginPath();
+
+ctx.moveTo(10,0);
+ctx.lineTo(s.radius+8,0);
+
+ctx.stroke();
+
+ctx.restore();
 
 
-  document.getElementById(
-    "leaderboard"
-  ).innerHTML=html;
+/* NAME */
+
+ctx.fillStyle="white";
+ctx.font="bold 12px Arial";
+ctx.textAlign="center";
+ctx.shadowColor="#000";
+ctx.shadowBlur=5;
+
+ctx.fillText(
+s.name,
+s.x,
+s.y-s.radius-17
+);
+
+ctx.shadowBlur=0;
+
+
+/*
+  JANGKAUAN HISAP
+*/
+
+if(s===player){
+
+let range=suctionRange();
+
+ctx.beginPath();
+
+ctx.arc(
+s.x,
+s.y,
+range,
+0,
+Math.PI*2
+);
+
+ctx.strokeStyle=
+magnetTime>0
+?"rgba(255,212,59,.35)"
+:"rgba(255,255,255,.06)";
+
+ctx.lineWidth=2;
+ctx.stroke();
+
+}
 
 }
 
@@ -2371,33 +1679,61 @@ function updateLeaderboard(){
 
 function updateUI(){
 
-  document.getElementById(
-    "nameUI"
-  ).innerText=
-    player.name;
+document.getElementById("nameUI")
+.innerText=player.name;
+
+document.getElementById("scoreUI")
+.innerText=Math.floor(player.score);
+
+document.getElementById("lengthUI")
+.innerText=player.body.length;
+
+document.getElementById("levelUI")
+.innerText=level;
+
+updateLeaderboard();
+updatePowers();
+updateCoinUI();
+
+}
 
 
-  document.getElementById(
-    "scoreUI"
-  ).innerText=
-    Math.floor(
-      player.score
-    );
+function updateLeaderboard(){
 
+let list=[
+{
+name:player.name,
+score:player.score
+}
+];
 
-  document.getElementById(
-    "lengthUI"
-  ).innerText=
-    player.body.length;
+enemies.forEach(e=>{
+list.push({
+name:e.name,
+score:e.score
+});
+});
 
+list.sort(
+(a,b)=>b.score-a.score
+);
 
-  document.getElementById(
-    "levelUI"
-  ).innerText=
-    level;
+let html="";
 
+list.slice(0,5).forEach(
+(p,i)=>{
 
-  updateLeaderboard();
+html+=`
+<div class="rankRow">
+<span>${i+1}. ${p.name}</span>
+<b>${Math.floor(p.score)}</b>
+</div>`;
+
+});
+
+document.getElementById(
+"leaderboard"
+).innerHTML=html;
 
 }
 
@@ -2406,41 +1742,91 @@ function updateUI(){
    MESSAGE
 ========================= */
 
-let messageTimer;
+function showMessage(text,time=1000){
+
+let el=
+document.getElementById("message");
+
+el.innerText=text;
+el.classList.add("show");
+
+clearTimeout(messageTimer);
+
+messageTimer=
+setTimeout(()=>{
+el.classList.remove("show");
+},time);
+
+}
 
 
-function showMessage(
-  text,
-  time=1000
-){
+/* =========================
+   SHOP
+========================= */
 
-  const el=
-    document.getElementById(
-      "message"
-    );
+function openShop(){
 
+if(!running)return;
 
-  el.innerText=text;
+running=false;
 
-  el.classList.add(
-    "show"
-  );
+updateCoinUI();
 
+document.getElementById("shop")
+.style.display="flex";
 
-  clearTimeout(
-    messageTimer
-  );
+}
 
 
-  messageTimer=
-    setTimeout(
-      ()=>{
-        el.classList.remove(
-          "show"
-        );
-      },
-      time
-    );
+function closeShop(){
+
+document.getElementById("shop")
+.style.display="none";
+
+running=true;
+
+lastTime=performance.now();
+
+requestAnimationFrame(gameLoop);
+
+}
+
+
+function buyItem(type,cost){
+
+if(wallet<cost){
+
+showMessage(
+"❌ Koin tidak cukup!",
+1000
+);
+
+return;
+
+}
+
+wallet-=cost;
+
+saveCoins();
+
+if(type==="magnet")
+magnetTime=60*20;
+
+if(type==="zoom")
+zoomTime=60*20;
+
+if(type==="bonus")
+bonusTime=60*20;
+
+if(type==="speed")
+speedTime=60*20;
+
+updateCoinUI();
+
+showMessage(
+"✅ ITEM AKTIF!",
+1000
+);
 
 }
 
@@ -2451,29 +1837,22 @@ function showMessage(
 
 function gameOver(reason){
 
-  running=false;
+running=false;
 
-  boost=false;
+boost=false;
 
+document.getElementById(
+"overText"
+).innerText=reason;
 
-  document.getElementById(
-    "finalScore"
-  ).innerText=
-    Math.floor(
-      player.score
-    );
+document.getElementById(
+"finalScore"
+).innerText=
+Math.floor(player.score);
 
-
-  document.getElementById(
-    "overText"
-  ).innerText=
-    reason;
-
-
-  document.getElementById(
-    "gameOver"
-  ).style.display=
-    "flex";
+document.getElementById(
+"gameOver"
+).style.display="flex";
 
 }
 
@@ -2484,15 +1863,204 @@ function gameOver(reason){
 
 function restartGame(){
 
-  document.getElementById(
-    "gameOver"
-  ).style.display=
-    "none";
+document.getElementById(
+"gameOver"
+).style.display="none";
 
-
-  startGame();
+startGame();
 
 }
+
+
+/* =========================
+   MOUSE
+========================= */
+
+canvas.addEventListener(
+"mousemove",
+e=>{
+mouseX=e.clientX;
+mouseY=e.clientY;
+}
+);
+
+
+/* =========================
+   TOUCH
+========================= */
+
+canvas.addEventListener(
+"touchmove",
+e=>{
+
+if(e.touches.length){
+
+mouseX=e.touches[0].clientX;
+mouseY=e.touches[0].clientY;
+
+}
+
+},
+{passive:true}
+);
+
+
+/* =========================
+   JOYSTICK
+========================= */
+
+const joystick=
+document.getElementById("joystick");
+
+const stick=
+document.getElementById("stick");
+
+
+function joystickMove(e){
+
+let r=
+joystick.getBoundingClientRect();
+
+let cx=r.left+r.width/2;
+let cy=r.top+r.height/2;
+
+let x=e.clientX-cx;
+let y=e.clientY-cy;
+
+let max=r.width/2-27;
+
+let len=Math.hypot(x,y);
+
+if(len>max){
+
+x=x/len*max;
+y=y/len*max;
+
+}
+
+stick.style.transform=
+`translate(${x}px,${y}px)`;
+
+if(Math.hypot(x,y)>10){
+
+player.angle=
+Math.atan2(y,x);
+
+joystickActive=true;
+
+}
+
+}
+
+
+joystick.addEventListener(
+"pointerdown",
+e=>{
+joystick.setPointerCapture(e.pointerId);
+joystickMove(e);
+}
+);
+
+joystick.addEventListener(
+"pointermove",
+e=>{
+if(e.buttons)joystickMove(e);
+}
+);
+
+joystick.addEventListener(
+"pointerup",
+()=>{
+joystickActive=false;
+stick.style.transform="translate(0,0)";
+}
+);
+
+
+/* =========================
+   BOOST
+========================= */
+
+const boostBtn=
+document.getElementById("boostBtn");
+
+boostBtn.addEventListener(
+"pointerdown",
+e=>{
+e.preventDefault();
+boost=true;
+}
+);
+
+boostBtn.addEventListener(
+"pointerup",
+()=>{
+boost=false;
+}
+);
+
+boostBtn.addEventListener(
+"pointercancel",
+()=>{
+boost=false;
+}
+);
+
+boostBtn.addEventListener(
+"pointerleave",
+()=>{
+boost=false;
+}
+);
+
+
+/* =========================
+   KEYBOARD
+========================= */
+
+document.addEventListener(
+"keydown",
+e=>{
+
+if(!running)return;
+
+if(
+e.key==="ArrowUp"||
+e.key.toLowerCase()==="w"
+)
+player.angle=-Math.PI/2;
+
+if(
+e.key==="ArrowDown"||
+e.key.toLowerCase()==="s"
+)
+player.angle=Math.PI/2;
+
+if(
+e.key==="ArrowLeft"||
+e.key.toLowerCase()==="a"
+)
+player.angle=Math.PI;
+
+if(
+e.key==="ArrowRight"||
+e.key.toLowerCase()==="d"
+)
+player.angle=0;
+
+if(e.code==="Space")
+boost=true;
+
+}
+);
+
+document.addEventListener(
+"keyup",
+e=>{
+if(e.code==="Space")
+boost=false;
+}
+);
 
 
 /* =========================
@@ -2501,155 +2069,39 @@ function restartGame(){
 
 function gameLoop(time){
 
-  if(!running)
-    return;
+if(!running)return;
 
+if(time-lastTime>=16){
 
-  /*
-    Update kira-kira 60 FPS
-  */
+lastTime=time;
 
-  if(
-    time-lastTime>=10
-  ){
+updatePlayer();
+updateEnemies();
 
-    lastTime=time;
+suckItems();
+eatFood();
 
+headBattle();
 
-    updatePlayer();
+if(!running)return;
 
-    updateEnemies();
+bodyCollision();
 
-    eatFood();
+if(!running)return;
 
-    headBattle();
+updateLevel();
+updateUI();
 
+}
 
-    if(!running)
-      return;
+drawWorld();
 
-
-    bodyCollision();
-
-
-    if(!running)
-      return;
-
-
-    updateLevel();
-
-    updateUI();
-
-  }
-
-
-  drawWorld();
-
-
-  requestAnimationFrame(
-    gameLoop
-  );
+requestAnimationFrame(gameLoop);
 
 }
 
 
-/* =========================
-   KEYBOARD
-========================= */
-
-document.addEventListener(
-  "keydown",
-  e=>{
-
-    if(!running)
-      return;
-
-
-    if(
-      e.key==="ArrowUp" ||
-      e.key.toLowerCase()==="w"
-    ){
-
-      player.angle=
-        -Math.PI/2;
-
-    }
-
-
-    if(
-      e.key==="ArrowDown" ||
-      e.key.toLowerCase()==="s"
-    ){
-
-      player.angle=
-        Math.PI/2;
-
-    }
-
-
-    if(
-      e.key==="ArrowLeft" ||
-      e.key.toLowerCase()==="a"
-    ){
-
-      player.angle=
-        Math.PI;
-
-    }
-
-
-    if(
-      e.key==="ArrowRight" ||
-      e.key.toLowerCase()==="d"
-    ){
-
-      player.angle=0;
-
-    }
-
-
-    if(
-      e.code==="Space"
-    ){
-
-      boost=true;
-
-    }
-
-  }
-);
-
-
-document.addEventListener(
-  "keyup",
-  e=>{
-
-    if(
-      e.code==="Space"
-    ){
-
-      boost=false;
-
-    }
-
-  }
-);
-
-
-/* =========================
-   PREVENT SCROLL
-========================= */
-
-document.addEventListener(
-  "touchmove",
-  e=>{
-
-    if(running)
-      e.preventDefault();
-
-  },
-  {passive:false}
-);
+updateCoinUI();
 
 </script>
 
